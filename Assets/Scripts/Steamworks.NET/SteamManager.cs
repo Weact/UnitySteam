@@ -160,7 +160,7 @@ public class SteamManager : MonoBehaviour {
 		if (!m_bInitialized) {
 			return;
 		}
-
+		
 		SteamAPI.Shutdown();
 	}
 
