@@ -76,19 +76,28 @@ public class SteamLobby : MonoBehaviour
     {
         // ! network.user.LobbyID is already done in EnterLobby_t and LobbyCreated_t Callbacks !
 
-        if(type != Steamworks.ELobbyType.k_ELobbyTypePrivate ||
-            type != Steamworks.ELobbyType.k_ELobbyTypePublic ||
-            type != Steamworks.ELobbyType.k_ELobbyTypeFriendsOnly ||
+        Debug.Log("CreatedLobby method entered.. Attempting to create lobby");
+
+        if(type != Steamworks.ELobbyType.k_ELobbyTypePrivate &&
+            type != Steamworks.ELobbyType.k_ELobbyTypePublic &&
+            type != Steamworks.ELobbyType.k_ELobbyTypeFriendsOnly &&
             type != Steamworks.ELobbyType.k_ELobbyTypeInvisible)
         {
+            Debug.Log("Invalid type, returning");
             return;
+        }
+        else
+        {
+            Debug.Log("Valid type, trying to create a lobby");
         }
 
         if( network.user.hasLobby )
         {
+            Debug.Log("User already has a lobby, leaving..");
             LeaveLobby();
         }
 
+        Debug.Log("Creating..");
         SteamMatchmaking.CreateLobby(type, maxMembers);
     }
     
@@ -187,8 +196,6 @@ public class SteamLobby : MonoBehaviour
         
         Steamworks.EResult result = pCallBack.m_eResult;
         Steamworks.CSteamID createdLobbyId = (Steamworks.CSteamID) pCallBack.m_ulSteamIDLobby;
-
-        network.user.LobbyID = createdLobbyId;
 
         Debug.Log($"OnLobbyCreated | Result : {result} | Lobby ID : {createdLobbyId} | User Lobby ID : {network.user.LobbyID}");
     }

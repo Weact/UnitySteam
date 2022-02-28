@@ -5,6 +5,8 @@ using Steamworks;
 
 public class SteamNetwork : MonoBehaviour
 {
+    [SerializeField] SteamLobby lobby_manager;
+
     public struct s_SteamUser
     {
         public Steamworks.CSteamID steamid { get; private set; }
@@ -103,9 +105,10 @@ public class SteamNetwork : MonoBehaviour
             //SteamID which can be converted to CSteamID later
             user = s_SteamUser.Init(SteamUser.GetSteamID(), SteamFriends.GetPersonaName());
 
-            if (TryGetComponent(out SteamLobby sl))
+            if(lobby_manager != null)
             {
-                sl.CreateLobby(Steamworks.ELobbyType.k_ELobbyTypePublic, 5);
+                Debug.Log("Making an attempt to create a lobby with 5 max_players");
+                lobby_manager.CreateLobby(Steamworks.ELobbyType.k_ELobbyTypePublic, 5);
             }
 
             Debug.Log(user.ToString());
@@ -198,6 +201,7 @@ public class SteamNetwork : MonoBehaviour
         }
     }
 
+    // space to trigger
     void OnPlayersRequested(NumberOfCurrentPlayers_t pCallBack, bool bIOFailure)
     {
         if(pCallBack.m_bSuccess != 1 || bIOFailure)
