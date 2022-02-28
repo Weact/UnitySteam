@@ -5,6 +5,8 @@ using Steamworks;
 
 public class SteamNetwork : MonoBehaviour
 {
+    [SerializeField] SteamLobby lobby_manager;
+
     public struct s_SteamUser
     {
         public Steamworks.CSteamID steamid { get; private set; }
@@ -36,19 +38,22 @@ public class SteamNetwork : MonoBehaviour
                 if((uint)value == 0)
                 {
                     hasLobby = false;
-                    lobbyId = (Steamworks.CSteamID)0;
+                    lobbyId = (Steamworks.CSteamID) 0;
+                    Debug.Log($"LOBBY ID HAS BEEN SET TO 0 ! [ lobby id : {lobbyId} ]");
                 }
                 else
                 {
                     hasLobby = true;
                     lobbyId = value;
+                    Debug.Log($"LOBBY ID HAS BEEN SET ! [ lobby id : {lobbyId} ]");
                 }
             }
         }
-        public override string ToString() => $"(USER ID : {steamid} | USER NAME : {username} | IS IN LOBBY : {hasLobby} | LOBBY ID : {LobbyID} )";
+
+        public override string ToString() => $"USER ID : {steamid} | USER NAME : {username} | IS IN LOBBY : {hasLobby} | LOBBY ID : {LobbyID}";
     }
 
-    s_SteamUser user;
+    public s_SteamUser user;
 
     #region callbacks
 
@@ -85,6 +90,7 @@ public class SteamNetwork : MonoBehaviour
     {
         if (SteamManager.Initialized)
         {
+            Debug.Log($"SteamNetwork.cs has been Enabled");
             SteamFriends.SetListenForFriendsMessages(true);
 
             //Create all necessary steam callbacks
@@ -98,6 +104,13 @@ public class SteamNetwork : MonoBehaviour
             //Assign and Print User's SteamID and Username
             //SteamID which can be converted to CSteamID later
             user = s_SteamUser.Init(SteamUser.GetSteamID(), SteamFriends.GetPersonaName());
+
+            if(lobby_manager != null)
+            {
+                Debug.Log("Making an attempt to create a lobby with 5 max_players");
+                lobby_manager.CreateLobby(Steamworks.ELobbyType.k_ELobbyTypePublic, 5);
+            }
+
             Debug.Log(user.ToString());
         }
     }
@@ -123,10 +136,36 @@ public class SteamNetwork : MonoBehaviour
         Debug.Log("Callresults created successfully");
     }
 
-    void AutoReply(CSteamID senderID, string message)
+    void AutoReply(Steamworks.CSteamID senderID, string message)
     {
+        if(message == "invite me" || message == "inv me" || message == "invite moi" || message == "inv moi")
+        {
+            SteamFriends.ReplyToFriendMessage(senderID, "Got It !");
+            InviteFriendToPlay(senderID);
+            
+            Debug.Log($"Replied to { SteamFriends.GetFriendPersonaName(senderID) } and sent an invite");
+            return;
+        }
+
         SteamFriends.ReplyToFriendMessage(senderID, message);
         Debug.Log("Replied to " + SteamFriends.GetFriendPersonaName(senderID) + " " + senderID + " with " + message );
+    }
+
+    void InviteFriendToPlay(Steamworks.CSteamID friendIdToInvite)
+    {
+        if( (uint) user.LobbyID == 0 )
+        {
+            Debug.Log("Tried to invite a friend to a Invalid Lobby");
+            return;
+        }
+        if( (uint)friendIdToInvite == 0)
+        {
+            Debug.Log("Tried to invite a friend with invalid Steam ID");
+            return;
+        }
+
+        SteamMatchmaking.InviteUserToLobby(user.LobbyID, friendIdToInvite);
+        Debug.Log($"{ SteamFriends.GetFriendPersonaName(friendIdToInvite) } has been Invited to play! Lobby ID : { user.LobbyID }");
     }
 
     #endregion
@@ -150,8 +189,6 @@ public class SteamNetwork : MonoBehaviour
         CSteamID senderID = pCallBack.m_steamIDUser;
         int messageID = pCallBack.m_iMessageID;
 
-        Debug.Log("Message received from " + SteamFriends.GetFriendPersonaName(senderID) + " " + senderID + " ID : " + messageID);
-
         Steamworks.EChatEntryType entry = Steamworks.EChatEntryType.k_EChatEntryTypeInvalid;
         string msg;
 
@@ -159,10 +196,12 @@ public class SteamNetwork : MonoBehaviour
 
         if (entry == Steamworks.EChatEntryType.k_EChatEntryTypeChatMsg)
         {
+            Debug.Log("Message received from " + SteamFriends.GetFriendPersonaName(senderID) + " " + senderID + " ID : " + messageID);
             AutoReply(senderID, msg);
         }
     }
 
+    // space to trigger
     void OnPlayersRequested(NumberOfCurrentPlayers_t pCallBack, bool bIOFailure)
     {
         if(pCallBack.m_bSuccess != 1 || bIOFailure)
