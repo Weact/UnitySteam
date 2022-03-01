@@ -5,7 +5,7 @@ using Steamworks;
 
 public class SteamLobby : MonoBehaviour
 {
-    [SerializeField] SteamNetwork network;
+    public SteamNetwork m_network_manager = null;
 
     #region callbacks
 
@@ -35,20 +35,21 @@ public class SteamLobby : MonoBehaviour
         
     }
 
-    void OnEnable()
+    public void InitAPI()
     {
         if (SteamManager.Initialized)
         {
-            Debug.Log($"SteamLobby.cs has been Enabled");
-
             CreateCallbacks();
             CreateCallResults();
         }
     }
 
+    void OnEnable()
+    {
+    }
+
     void OnDisable()
     {
-
     }
 
     #endregion
@@ -63,20 +64,15 @@ public class SteamLobby : MonoBehaviour
         m_LobbyDataUpdate = Callback<LobbyDataUpdate_t>.Create(OnLobbyDataUpdate);
         m_LobbyEntered = Callback<LobbyEnter_t>.Create(OnLobbyEntered);
         m_LobbyRequestList = Callback<LobbyMatchList_t>.Create(OnLobbyRequestList);
-
-        Debug.Log("Callbacks created successfully");
     }
 
     void CreateCallResults()
     {
-        Debug.Log("Callresults created successfully");
     }
 
     public void CreateLobby(Steamworks.ELobbyType type, int maxMembers)
     {
         // ! network.user.LobbyID is already done in EnterLobby_t and LobbyCreated_t Callbacks !
-
-        Debug.Log("CreatedLobby method entered.. Attempting to create lobby");
 
         if(type != Steamworks.ELobbyType.k_ELobbyTypePrivate &&
             type != Steamworks.ELobbyType.k_ELobbyTypePublic &&
@@ -86,18 +82,13 @@ public class SteamLobby : MonoBehaviour
             Debug.Log("Invalid type, returning");
             return;
         }
-        else
-        {
-            Debug.Log("Valid type, trying to create a lobby");
-        }
 
-        if( network.user.hasLobby )
+        if( m_network_manager.user.hasLobby )
         {
             Debug.Log("User already has a lobby, leaving..");
             LeaveLobby();
         }
 
-        Debug.Log("Creating..");
         SteamMatchmaking.CreateLobby(type, maxMembers);
     }
     
@@ -114,22 +105,22 @@ public class SteamLobby : MonoBehaviour
     {
         if (SteamManager.Initialized)
         {
-            if ( network.user.hasLobby )
+            if (m_network_manager.user.hasLobby )
             {
-                Debug.Log($"Lobby ID {network.user.LobbyID} has been left");
-                SteamMatchmaking.LeaveLobby(network.user.LobbyID);
-                network.user.LobbyID = (Steamworks.CSteamID) 0;
+                Debug.Log($"Lobby ID {m_network_manager.user.LobbyID} has been left");
+                SteamMatchmaking.LeaveLobby(m_network_manager.user.LobbyID);
+                m_network_manager.user.LobbyID = (Steamworks.CSteamID) 0;
             }
         }
     }
 
     public void JoinLobby(Steamworks.CSteamID lobbyId)
     {
-        // ! network.user.LobbyID is already done in EnterLobby_t and LobbyCreated_t Callbacks !
+        // ! m_network_manager.user.LobbyID is already done in EnterLobby_t and LobbyCreated_t Callbacks !
 
         if (SteamManager.Initialized)
         {
-            if ( network.user.hasLobby )
+            if (m_network_manager.user.hasLobby )
             {
                 LeaveLobby();
             }
@@ -197,7 +188,7 @@ public class SteamLobby : MonoBehaviour
         Steamworks.EResult result = pCallBack.m_eResult;
         Steamworks.CSteamID createdLobbyId = (Steamworks.CSteamID) pCallBack.m_ulSteamIDLobby;
 
-        Debug.Log($"OnLobbyCreated | Result : {result} | Lobby ID : {createdLobbyId} | User Lobby ID : {network.user.LobbyID}");
+        Debug.Log($"OnLobbyCreated | Result : {result} | Lobby ID : {createdLobbyId}");
     }
 
     void OnLobbyDataUpdate(LobbyDataUpdate_t pCallBack)
@@ -232,9 +223,10 @@ public class SteamLobby : MonoBehaviour
         bool locked = pCallBack.m_bLocked;
         uint response = pCallBack.m_EChatRoomEnterResponse;
 
-        network.user.LobbyID = enteredLobbyId;
+        m_network_manager.user.LobbyID = enteredLobbyId;
 
-        Debug.Log($"OnLobbyEntered | Lobby ID : {enteredLobbyId} | Locked : {locked} | Response : {response} | User Lobby : {network.user.LobbyID}");
+        Debug.Log($"OnLobbyEntered | Lobby ID : {enteredLobbyId} | Locked : {locked} | Response : {response} | User Lobby : {m_network_manager.user.LobbyID}");
+        Debug.Log(m_network_manager.user.ToString() );
     }
 
     void OnLobbyRequestList(LobbyMatchList_t pCallBack)

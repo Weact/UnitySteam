@@ -5,7 +5,7 @@ using Steamworks;
 
 public class SteamNetwork : MonoBehaviour
 {
-    [SerializeField] SteamLobby lobby_manager;
+    public SteamLobby m_lobby_manager = null;
 
     public struct s_SteamUser
     {
@@ -86,11 +86,11 @@ public class SteamNetwork : MonoBehaviour
         }
     }
 
-    void OnEnable()
+
+    public void InitAPI()
     {
         if (SteamManager.Initialized)
         {
-            Debug.Log($"SteamNetwork.cs has been Enabled");
             SteamFriends.SetListenForFriendsMessages(true);
 
             //Create all necessary steam callbacks
@@ -105,14 +105,23 @@ public class SteamNetwork : MonoBehaviour
             //SteamID which can be converted to CSteamID later
             user = s_SteamUser.Init(SteamUser.GetSteamID(), SteamFriends.GetPersonaName());
 
-            if(lobby_manager != null)
+            if (m_lobby_manager != null)
             {
                 Debug.Log("Making an attempt to create a lobby with 5 max_players");
-                lobby_manager.CreateLobby(Steamworks.ELobbyType.k_ELobbyTypePublic, 5);
+                m_lobby_manager.CreateLobby(Steamworks.ELobbyType.k_ELobbyTypePublic, 5);
+            }
+            else
+            {
+                Debug.Log("Lobby Manager is null");
             }
 
             Debug.Log(user.ToString());
         }
+    }
+
+    void OnEnable()
+    {
+        
     }
 
     void OnDisable()
@@ -127,13 +136,11 @@ public class SteamNetwork : MonoBehaviour
     {
         m_GameOverlayActivated = Callback<GameOverlayActivated_t>.Create(OnGameOverlayActivated);
         m_GameConnectedFriendChatMsg = Callback<GameConnectedFriendChatMsg_t>.Create(OnGameConnectedFriendChatMsg);
-        Debug.Log("Callbacks created successfully");
     }
 
     void CreateCallResults()
     {
         m_CurrentPlayers = CallResult<NumberOfCurrentPlayers_t>.Create(OnPlayersRequested);
-        Debug.Log("Callresults created successfully");
     }
 
     void AutoReply(Steamworks.CSteamID senderID, string message)
