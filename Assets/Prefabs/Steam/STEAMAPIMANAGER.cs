@@ -6,8 +6,8 @@ public class STEAMAPIMANAGER : MonoBehaviour
 {
     public static STEAMAPIMANAGER instance;
 
-    [SerializeField] public SteamNetwork network_manager = null;
-    [SerializeField] public SteamLobby lobby_manager = null;
+    public SteamNetwork network_manager;
+    public SteamLobby lobby_manager;
 
     private void Awake()
     {
@@ -34,9 +34,24 @@ public class STEAMAPIMANAGER : MonoBehaviour
             lobby_manager.InitAPI();
         }
     }
-
     public void CallApi()
     {
         Debug.Log("API Successfully Called !");
     }
+
+    public void CreateLobby(string lobbyname, Steamworks.ELobbyType type, int maxmembers)
+    {
+        lobby_manager.CreateLobby(lobbyname, type, maxmembers);
+    }
+
+    public void JoinLobby(Steamworks.CSteamID lobbyId)
+    {
+        lobby_manager.JoinLobby(lobbyId);
+    }
+
+    public void LeaveLobby()
+    {
+        lobby_manager.LeaveLobby();
+    }
+
 }

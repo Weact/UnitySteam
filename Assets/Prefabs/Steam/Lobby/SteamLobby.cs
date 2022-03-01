@@ -70,9 +70,15 @@ public class SteamLobby : MonoBehaviour
     {
     }
 
-    public void CreateLobby(Steamworks.ELobbyType type, int maxMembers)
+    public void CreateLobby(string lobbyName, Steamworks.ELobbyType type, int maxMembers)
     {
         // ! network.user.LobbyID is already done in EnterLobby_t and LobbyCreated_t Callbacks !
+
+        if(lobbyName == "")
+        {
+            Debug.Log("Lobby name must have a valid value");
+            return;
+        }
 
         if(type != Steamworks.ELobbyType.k_ELobbyTypePrivate &&
             type != Steamworks.ELobbyType.k_ELobbyTypePublic &&

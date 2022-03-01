@@ -105,15 +105,15 @@ public class SteamNetwork : MonoBehaviour
             //SteamID which can be converted to CSteamID later
             user = s_SteamUser.Init(SteamUser.GetSteamID(), SteamFriends.GetPersonaName());
 
-            if (m_lobby_manager != null)
-            {
-                Debug.Log("Making an attempt to create a lobby with 5 max_players");
-                m_lobby_manager.CreateLobby(Steamworks.ELobbyType.k_ELobbyTypePublic, 5);
-            }
-            else
-            {
-                Debug.Log("Lobby Manager is null");
-            }
+            //if (m_lobby_manager != null)
+            //{
+            //    Debug.Log("Making an attempt to create a lobby with 5 max_players");
+            //    m_lobby_manager.CreateLobby(Steamworks.ELobbyType.k_ELobbyTypePublic, 5);
+            //}
+            //else
+            //{
+            //    Debug.Log("Lobby Manager is null");
+            //}
 
             Debug.Log(user.ToString());
         }
