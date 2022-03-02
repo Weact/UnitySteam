@@ -70,7 +70,7 @@ public class SteamLobby : MonoBehaviour
     {
     }
 
-    public void CreateLobby(string lobbyName, Steamworks.ELobbyType type, int maxMembers)
+    public void CreateLobby(string lobbyName, ELobbyType type, int maxMembers)
     {
         // ! network.user.LobbyID is already done in EnterLobby_t and LobbyCreated_t Callbacks !
 
@@ -80,10 +80,10 @@ public class SteamLobby : MonoBehaviour
             return;
         }
 
-        if(type != Steamworks.ELobbyType.k_ELobbyTypePrivate &&
-            type != Steamworks.ELobbyType.k_ELobbyTypePublic &&
-            type != Steamworks.ELobbyType.k_ELobbyTypeFriendsOnly &&
-            type != Steamworks.ELobbyType.k_ELobbyTypeInvisible)
+        if(type != ELobbyType.k_ELobbyTypePrivate &&
+            type != ELobbyType.k_ELobbyTypePublic &&
+            type != ELobbyType.k_ELobbyTypeFriendsOnly &&
+            type != ELobbyType.k_ELobbyTypeInvisible)
         {
             Debug.Log("Invalid type, returning");
             return;
@@ -102,7 +102,7 @@ public class SteamLobby : MonoBehaviour
     {
         if (SteamManager.Initialized)
         {
-            SteamMatchmaking.AddRequestLobbyListDistanceFilter(Steamworks.ELobbyDistanceFilter.k_ELobbyDistanceFilterClose);
+            SteamMatchmaking.AddRequestLobbyListDistanceFilter(ELobbyDistanceFilter.k_ELobbyDistanceFilterClose);
             SteamMatchmaking.RequestLobbyList();
         }
     }
@@ -115,12 +115,12 @@ public class SteamLobby : MonoBehaviour
             {
                 Debug.Log($"Lobby ID {m_network_manager.user.LobbyID} has been left");
                 SteamMatchmaking.LeaveLobby(m_network_manager.user.LobbyID);
-                m_network_manager.user.LobbyID = (Steamworks.CSteamID) 0;
+                m_network_manager.user.LobbyID = (CSteamID) 0;
             }
         }
     }
 
-    public void JoinLobby(Steamworks.CSteamID lobbyId)
+    public void JoinLobby(CSteamID lobbyId)
     {
         // ! m_network_manager.user.LobbyID is already done in EnterLobby_t and LobbyCreated_t Callbacks !
 
@@ -191,8 +191,8 @@ public class SteamLobby : MonoBehaviour
         ///m_ulSteamIDLobby uint64  The Steam ID of the lobby that was created, 0 if failed.
         ///</summary>
         
-        Steamworks.EResult result = pCallBack.m_eResult;
-        Steamworks.CSteamID createdLobbyId = (Steamworks.CSteamID) pCallBack.m_ulSteamIDLobby;
+        EResult result = pCallBack.m_eResult;
+        CSteamID createdLobbyId = (CSteamID) pCallBack.m_ulSteamIDLobby;
 
         Debug.Log($"OnLobbyCreated | Result : {result} | Lobby ID : {createdLobbyId}");
     }
@@ -205,11 +205,11 @@ public class SteamLobby : MonoBehaviour
         ///m_bSuccess uint8   true if the lobby data was successfully changed, otherwise false.
         ///</summary>
         
-        uint lobby_id = (uint) pCallBack.m_ulSteamIDLobby;
-        uint member_steam_id = (uint) pCallBack.m_ulSteamIDMember;
+        CSteamID lobby_id = (CSteamID)pCallBack.m_ulSteamIDLobby;
+        CSteamID member_steam_id =  (CSteamID)pCallBack.m_ulSteamIDMember;
         byte success = pCallBack.m_bSuccess;
 
-        Debug.Log($"OnLobbyDataUpdate | Lobby ID : {lobby_id} | Member ID : {member_steam_id} | Success : {success}");
+        Debug.Log($"OnLobbyDataUpdate | Lobby ID : {(uint)lobby_id} | Member ID : {(uint)member_steam_id} | Success : {success} | With {SteamMatchmaking.GetNumLobbyMembers(lobby_id)} members in lobby");
     }
 
     void OnLobbyEntered(LobbyEnter_t pCallBack)
@@ -225,7 +225,7 @@ public class SteamLobby : MonoBehaviour
         /// 
         ///</summary>
 
-        Steamworks.CSteamID enteredLobbyId = (Steamworks.CSteamID) pCallBack.m_ulSteamIDLobby;
+        CSteamID enteredLobbyId = (CSteamID) pCallBack.m_ulSteamIDLobby;
         bool locked = pCallBack.m_bLocked;
         uint response = pCallBack.m_EChatRoomEnterResponse;
 

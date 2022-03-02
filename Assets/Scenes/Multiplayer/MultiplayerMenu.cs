@@ -32,6 +32,12 @@ public class MultiplayerMenu : MonoBehaviour
 
     public void Awake()
     {
+        if (!STEAMAPIMANAGER.instance.IsInitialized())
+        {
+            Debug.Log("Could not initialize STEAMAPIMANAGER, going back to MainMenu");
+            BackToMenu();
+            return;
+        }
         createLobbyButton.onClick.AddListener(SubmitLobby);
     }
 
@@ -46,10 +52,12 @@ public class MultiplayerMenu : MonoBehaviour
         {
             LobbyName = LobbyNameInputField.text,
             LobbyType = LobbyTypeInputDropdown.value,
-            LobbyMaxMembers = (int)LobbyMembersInputSlider.value
+            LobbyMaxMembers = 2
+            //LobbyMaxMembers = (int)LobbyMembersInputSlider.value
         };
 
         Debug.Log($"Lobby has been submited for {lobby}");
         STEAMAPIMANAGER.instance.CreateLobby(lobby.LobbyName, (Steamworks.ELobbyType)lobby.LobbyType, lobby.LobbyMaxMembers);
+        SceneManager.LoadScene("LobbyMenu");
     }
 }

@@ -17,6 +17,14 @@ public class MainMenu : MonoBehaviour
     
     public void QuitGame()
     {
+        if (STEAMAPIMANAGER.instance != null)
+        {
+            if (STEAMAPIMANAGER.instance.IsInitialized())
+            {
+                STEAMAPIMANAGER.instance.LeaveLobby();
+            }
+        }
+        
         Debug.Log("QUIT");
         Application.Quit();
     }
