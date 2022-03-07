@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using Steamworks;
 
 public class LobbyMenu : MonoBehaviour
 {
@@ -37,6 +38,7 @@ public class LobbyMenu : MonoBehaviour
             return;
         }
         SceneManager.LoadScene("Level01");
+        //STEAMAPIMANAGER.instance.SendLobbyMessage()
     }
 
     public void BackToMultiplayerMenu()

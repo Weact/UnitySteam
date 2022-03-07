@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Steamworks;
+using System;
 
 public class STEAMAPIMANAGER : MonoBehaviour
 {
@@ -37,6 +38,12 @@ public class STEAMAPIMANAGER : MonoBehaviour
 
     private void InitAPIs()
     {
+        if ( !SteamAPI.Init())
+        {
+            Debug.Log("could not initialize steam, maybe start steam ?");
+            initialized = false;
+            return;
+        }
         if(network_manager != null && lobby_manager != null)
         {
             network_manager.InitAPI();
@@ -44,12 +51,20 @@ public class STEAMAPIMANAGER : MonoBehaviour
             initialized = true;
         }
     }
+
+    public void SendLobbyMessage(string data)
+    {
+        byte[] bytes = new byte[data.Length * sizeof(char)];
+        Buffer.BlockCopy(data.ToCharArray(), 0, bytes, 0, bytes.Length);
+        SteamMatchmaking.SendLobbyChatMsg(network_manager.user.LobbyID, bytes, bytes.Length);
+    }
+
     public void CallApi()
     {
         Debug.Log("API Successfully Called !");
     }
 
-    public void CreateLobby(string lobbyname, Steamworks.ELobbyType type, int maxmembers)
+    public void CreateLobby(string lobbyname, ELobbyType type, int maxmembers)
     {
         lobby_manager.CreateLobby(lobbyname, type, maxmembers);
     }
@@ -64,12 +79,14 @@ public class STEAMAPIMANAGER : MonoBehaviour
         lobby_manager.LeaveLobby();
     }
 
-    public string GetLobbyHost()
+    public string GetLobbyHostUsername()
     {
-        if ( (uint)network_manager.user.LobbyID != 0 ) {
-            return network_manager.user.username;
-        }
-        return "Unknown";
+        return SteamFriends.GetFriendPersonaName(GetLobbyHostSteamID());
+    }
+
+    public CSteamID GetLobbyHostSteamID()
+    {
+        return SteamMatchmaking.GetLobbyOwner(network_manager.user.LobbyID);
     }
 
     public int GetLobbyMembersCount()

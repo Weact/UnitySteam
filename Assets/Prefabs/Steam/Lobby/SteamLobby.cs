@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Steamworks;
+using System.Text;
 
 public class SteamLobby : MonoBehaviour
 {
@@ -151,11 +152,23 @@ public class SteamLobby : MonoBehaviour
         ///m_iChatID uint32  The index of the chat entry to use with GetLobbyChatEntry, this is not valid outside of the scope of this callback and should never be stored.
         /// </summary>
 
-        uint lobby_id = (uint)pCallBack.m_ulSteamIDLobby;
-        uint steamuser_id = (uint)pCallBack.m_ulSteamIDUser;
-        uint entry_type = pCallBack.m_eChatEntryType;
+        CSteamID lobby_id = (CSteamID)pCallBack.m_ulSteamIDLobby;
+        CSteamID steamuser_id = (CSteamID)pCallBack.m_ulSteamIDUser;
+        EChatEntryType entry_type = (EChatEntryType)pCallBack.m_eChatEntryType;
+        uint message_id = pCallBack.m_iChatID;
 
-        Debug.Log($"ChatMsgReceived | Lobby ID : {lobby_id} | SteamUser_ID : {steamuser_id} | chatEntry : {entry_type}");
+        string sMessage;
+        byte[] bytes = new byte[4096];
+        SteamMatchmaking.GetLobbyChatEntry(lobby_id, (int)message_id, out steamuser_id, bytes, 4096, out entry_type);
+        sMessage = Encoding.Default.GetString(bytes);
+
+        Debug.Log("Message reçu du lobby : " + sMessage);
+        Debug.Log($"ChatMsgReceived | Lobby ID : {(uint)lobby_id} | SteamUser_ID : {(uint)steamuser_id} | chatEntry : {(uint)entry_type}");
+
+        if(sMessage == "entered")
+        {
+
+        }
     }
 
     void OnLobbyChatUpdate(LobbyChatUpdate_t pCallBack)
@@ -232,7 +245,11 @@ public class SteamLobby : MonoBehaviour
         m_network_manager.user.LobbyID = enteredLobbyId;
 
         Debug.Log($"OnLobbyEntered | Lobby ID : {enteredLobbyId} | Locked : {locked} | Response : {response} | User Lobby : {m_network_manager.user.LobbyID}");
-        Debug.Log(m_network_manager.user.ToString() );
+
+        if (m_network_manager.user.steamid != STEAMAPIMANAGER.instance.GetLobbyHostSteamID())
+        {
+            STEAMAPIMANAGER.instance.SendLobbyMessage("entered");
+        }
     }
 
     void OnLobbyRequestList(LobbyMatchList_t pCallBack)
