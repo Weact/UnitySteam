@@ -30,8 +30,8 @@ public class MultiplayerMenu : MonoBehaviour
     public TMPro.TMP_Dropdown LobbyTypeInputDropdown;
     public Slider LobbyMembersInputSlider;
 
-    public void Awake()    {
-
+    public void Awake()
+    {
         if (!STEAMAPIMANAGER.instance.IsInitialized())
         {
             Debug.Log("Could not initialize STEAMAPIMANAGER, going back to MainMenu");

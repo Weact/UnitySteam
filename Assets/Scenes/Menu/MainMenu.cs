@@ -5,6 +5,23 @@ using UnityEngine.SceneManagement;
 
 public class MainMenu : MonoBehaviour
 {
+
+    public TMPro.TMP_Text LobbyErrorMultiplayer;
+    public GameObject multiplayerButton;
+    private void Start()
+    {
+        if (!Steamworks.SteamAPI.Init())
+        {
+            LobbyErrorMultiplayer.gameObject.SetActive(true);
+            multiplayerButton.SetActive(false);
+        }
+        else
+        {
+            LobbyErrorMultiplayer.gameObject.SetActive(false);
+            multiplayerButton.SetActive(true);
+        }
+    }
+
     public void PlayGame()
     {
         SceneManager.LoadScene("Level01");

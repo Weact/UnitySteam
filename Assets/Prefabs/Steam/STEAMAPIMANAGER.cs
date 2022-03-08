@@ -11,7 +11,8 @@ public class STEAMAPIMANAGER : MonoBehaviour
     {
         STEAM_LOBBY_PLAYERS_COUNT_VALID_GAMESTART = 10001,
         STEAM_LOBBY_PLAYERS_COUNT_INVALID_ABORT = 10002,
-        STEAM_LOBBY_PLAYER_ENTERED = 10003
+        STEAM_LOBBY_PLAYER_ENTERED = 10003,
+        STEAM_LOBBY_PLAYER_LEFT = 10004
     }
 
     public static STEAMAPIMANAGER instance;
@@ -23,6 +24,10 @@ public class STEAMAPIMANAGER : MonoBehaviour
 
     private void Awake()
     {
+        if (!SteamAPI.Init())
+        {
+            return;
+        }
         if (instance != null || network_manager == null || lobby_manager == null)
         {
             //Debug.Log("ERROR, Could not create more than one instance of STEAMAPIMANAGER / Network Manager or Lobby Manager is null");

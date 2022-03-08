@@ -37,7 +37,11 @@ public class PlayerController : MonoBehaviour
         {
             if (STEAMAPIMANAGER.instance.IsInitialized())
             {
-                if (STEAMAPIMANAGER.instance.GetLobbyHostSteamID() == STEAMAPIMANAGER.instance.network_manager.user.steamid)
+                if (!STEAMAPIMANAGER.instance.network_manager.user.hasLobby)
+                {
+                    controlled = true;
+                }
+                else if (STEAMAPIMANAGER.instance.GetLobbyHostSteamID() == STEAMAPIMANAGER.instance.network_manager.user.steamid)
                 {
                     playerID = 1;
                     controlled = true;

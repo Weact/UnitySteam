@@ -116,6 +116,7 @@ public class SteamLobby : MonoBehaviour
             if (m_network_manager.user.hasLobby )
             {
                 Debug.Log($"Lobby ID {m_network_manager.user.LobbyID} has been left");
+                STEAMAPIMANAGER.instance.SendLobbyMessage(STEAMAPIMANAGER.SteamCustomCodes.STEAM_LOBBY_PLAYER_LEFT.ToString());
                 SteamMatchmaking.LeaveLobby(m_network_manager.user.LobbyID);
                 m_network_manager.user.LobbyID = (CSteamID) 0;
             }
@@ -180,6 +181,11 @@ public class SteamLobby : MonoBehaviour
         else if(string.Compare(sMessage, STEAMAPIMANAGER.SteamCustomCodes.STEAM_LOBBY_PLAYER_ENTERED.ToString()) == 0)
         {
             Debug.Log("A PLAYER ENTERED THE LOBBY");
+            return;
+        }
+        else if(string.Compare(sMessage, STEAMAPIMANAGER.SteamCustomCodes.STEAM_LOBBY_PLAYER_LEFT.ToString()) == 0)
+        {
+            Debug.Log("A PLAYER LEFT THE LOBBY");
             return;
         }
         else
