@@ -33,6 +33,30 @@ public class PlayerController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        if (STEAMAPIMANAGER.instance != null)
+        {
+            if (STEAMAPIMANAGER.instance.IsInitialized())
+            {
+                if (STEAMAPIMANAGER.instance.GetLobbyHostSteamID() == STEAMAPIMANAGER.instance.network_manager.user.steamid)
+                {
+                    playerID = 1;
+                    controlled = true;
+                }
+                else
+                {
+                    playerID = 2;
+                }
+            }
+            else // SINGLE PLAYER
+            {
+                controlled = true;
+            }
+        }
+        else // SINGLE PLAYER
+        {
+            controlled = true;
+        }
+
         controller = GetComponent<CharacterController>();
         if (lockCursor)
         {

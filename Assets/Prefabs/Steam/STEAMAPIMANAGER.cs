@@ -3,9 +3,17 @@ using System.Collections.Generic;
 using UnityEngine;
 using Steamworks;
 using System;
+using System.Text;
 
 public class STEAMAPIMANAGER : MonoBehaviour
 {
+    public enum SteamCustomCodes : int
+    {
+        STEAM_LOBBY_PLAYERS_COUNT_VALID_GAMESTART = 10001,
+        STEAM_LOBBY_PLAYERS_COUNT_INVALID_ABORT = 10002,
+        STEAM_LOBBY_PLAYER_ENTERED = 10003
+    }
+
     public static STEAMAPIMANAGER instance;
 
     public SteamNetwork network_manager;
@@ -49,13 +57,15 @@ public class STEAMAPIMANAGER : MonoBehaviour
             network_manager.InitAPI();
             lobby_manager.InitAPI();
             initialized = true;
+
+            LeaveLobby();
         }
     }
 
     public void SendLobbyMessage(string data)
     {
         byte[] bytes = new byte[data.Length * sizeof(char)];
-        Buffer.BlockCopy(data.ToCharArray(), 0, bytes, 0, bytes.Length);
+        bytes = Encoding.Default.GetBytes(data);
         SteamMatchmaking.SendLobbyChatMsg(network_manager.user.LobbyID, bytes, bytes.Length);
     }
 
@@ -96,6 +106,16 @@ public class STEAMAPIMANAGER : MonoBehaviour
             return SteamMatchmaking.GetNumLobbyMembers(network_manager.user.LobbyID);
         }
         return 0;
+    }
+
+    public string GetLobbyName()
+    {
+        if (!IsInitialized())
+        {
+            return "";
+        }
+
+        return SteamMatchmaking.GetLobbyData(network_manager.user.LobbyID, "name");
     }
 
 }

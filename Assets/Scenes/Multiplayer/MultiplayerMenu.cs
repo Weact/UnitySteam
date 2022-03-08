@@ -56,6 +56,11 @@ public class MultiplayerMenu : MonoBehaviour
             //LobbyMaxMembers = (int)LobbyMembersInputSlider.value
         };
 
+        if(lobby.LobbyName == "")
+        {
+            return;
+        }
+
         Debug.Log($"Lobby has been submited for {lobby}");
         STEAMAPIMANAGER.instance.CreateLobby(lobby.LobbyName, (Steamworks.ELobbyType)lobby.LobbyType, lobby.LobbyMaxMembers);
         SceneManager.LoadScene("LobbyMenu");

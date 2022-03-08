@@ -35,10 +35,10 @@ public class LobbyMenu : MonoBehaviour
     {
         if (STEAMAPIMANAGER.instance.GetLobbyMembersCount() != 2)
         {
+            STEAMAPIMANAGER.instance.SendLobbyMessage(STEAMAPIMANAGER.SteamCustomCodes.STEAM_LOBBY_PLAYERS_COUNT_INVALID_ABORT.ToString());
             return;
         }
-        SceneManager.LoadScene("Level01");
-        //STEAMAPIMANAGER.instance.SendLobbyMessage()
+        STEAMAPIMANAGER.instance.SendLobbyMessage(STEAMAPIMANAGER.SteamCustomCodes.STEAM_LOBBY_PLAYERS_COUNT_VALID_GAMESTART.ToString()) ;
     }
 
     public void BackToMultiplayerMenu()

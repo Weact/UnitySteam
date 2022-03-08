@@ -205,7 +205,7 @@ public class SteamNetwork : MonoBehaviour
         if (entry == Steamworks.EChatEntryType.k_EChatEntryTypeChatMsg)
         {
             Debug.Log("Message received from " + SteamFriends.GetFriendPersonaName(senderID) + " " + senderID + " ID : " + messageID);
-            AutoReply(senderID, msg);
+            //AutoReply(senderID, msg);
         }
     }
 

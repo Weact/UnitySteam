@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Steamworks;
 using System.Text;
+using UnityEngine.SceneManagement;
 
 public class SteamLobby : MonoBehaviour
 {
@@ -162,13 +163,31 @@ public class SteamLobby : MonoBehaviour
         SteamMatchmaking.GetLobbyChatEntry(lobby_id, (int)message_id, out steamuser_id, bytes, 4096, out entry_type);
         sMessage = Encoding.Default.GetString(bytes);
 
-        Debug.Log("Message reçu du lobby : " + sMessage);
         Debug.Log($"ChatMsgReceived | Lobby ID : {(uint)lobby_id} | SteamUser_ID : {(uint)steamuser_id} | chatEntry : {(uint)entry_type}");
 
-        if(sMessage == "entered")
-        {
+        //string.Compare(str1, str2);
 
+        if(string.Compare(sMessage, STEAMAPIMANAGER.SteamCustomCodes.STEAM_LOBBY_PLAYERS_COUNT_VALID_GAMESTART.ToString() ) == 0)
+        {
+            SceneManager.LoadScene("Level01");
+            return;
         }
+        else if(string.Compare(sMessage, STEAMAPIMANAGER.SteamCustomCodes.STEAM_LOBBY_PLAYERS_COUNT_INVALID_ABORT.ToString()) == 0)
+        {
+            Debug.Log("TOO FEW PLAYERS IN LOBBY");
+            return;
+        }
+        else if(string.Compare(sMessage, STEAMAPIMANAGER.SteamCustomCodes.STEAM_LOBBY_PLAYER_ENTERED.ToString()) == 0)
+        {
+            Debug.Log("A PLAYER ENTERED THE LOBBY");
+            return;
+        }
+        else
+        {
+            Debug.Log($"Message : {sMessage}"); 
+            return;
+        }
+
     }
 
     void OnLobbyChatUpdate(LobbyChatUpdate_t pCallBack)
@@ -249,6 +268,7 @@ public class SteamLobby : MonoBehaviour
         if (m_network_manager.user.steamid != STEAMAPIMANAGER.instance.GetLobbyHostSteamID())
         {
             STEAMAPIMANAGER.instance.SendLobbyMessage("entered");
+            SceneManager.LoadScene("JoinedLobbyMenu");
         }
     }
 
