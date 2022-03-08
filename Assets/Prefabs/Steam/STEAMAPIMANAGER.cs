@@ -84,7 +84,7 @@ public class STEAMAPIMANAGER : MonoBehaviour
         lobby_manager.CreateLobby(lobbyname, type, maxmembers);
     }
 
-    public void JoinLobby(Steamworks.CSteamID lobbyId)
+    public void JoinLobby(CSteamID lobbyId)
     {
         lobby_manager.JoinLobby(lobbyId);
     }
@@ -92,6 +92,11 @@ public class STEAMAPIMANAGER : MonoBehaviour
     public void LeaveLobby()
     {
         lobby_manager.LeaveLobby();
+    }
+
+    public void SearchForLobbies()
+    {
+        lobby_manager.SearchLobby();
     }
 
     public string GetLobbyHostUsername()

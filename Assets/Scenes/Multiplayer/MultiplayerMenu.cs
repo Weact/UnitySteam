@@ -30,6 +30,9 @@ public class MultiplayerMenu : MonoBehaviour
     public TMPro.TMP_Dropdown LobbyTypeInputDropdown;
     public Slider LobbyMembersInputSlider;
 
+    public GameObject LobbiesList = null;
+    public GameObject prefabLobbyButtonJoin = null;
+
     public void Awake()
     {
         if (!STEAMAPIMANAGER.instance.IsInitialized())
@@ -64,5 +67,25 @@ public class MultiplayerMenu : MonoBehaviour
         Debug.Log($"Lobby has been submited for {lobby}");
         STEAMAPIMANAGER.instance.CreateLobby(lobby.LobbyName, (Steamworks.ELobbyType)lobby.LobbyType, lobby.LobbyMaxMembers);
         SceneManager.LoadScene("LobbyMenu");
+    }
+
+    public void UpdateLobbyList()
+    {
+        if (!Steamworks.SteamAPI.Init())
+        {
+            return;
+        }else if (!STEAMAPIMANAGER.instance.IsInitialized())
+        {
+            return;
+        }
+
+        STEAMAPIMANAGER.instance.SearchForLobbies();
+
+        //string lobbyName = "lobby1";
+        //GameObject LobbyButtonJoin = Instantiate(prefabLobbyButtonJoin, new Vector3(0, 0, 0), Quaternion.identity);
+            //myJoinButton.GetComponent<JoinLobby>().cSteamID = idLobby;
+            //myJoinButton.transform.GetChild(0).GetChild(0).gameObject.GetComponent<UnityEngine.UI.Text>().text = sName;
+        //LobbyButtonJoin.transform.GetChild(0).gameObject.GetComponent<Text>().text = lobbyName;
+        //LobbyButtonJoin.transform.SetParent(LobbiesList.transform);
     }
 }

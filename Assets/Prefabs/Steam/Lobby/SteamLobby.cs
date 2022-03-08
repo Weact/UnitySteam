@@ -17,6 +17,8 @@ public class SteamLobby : MonoBehaviour
     protected Callback<LobbyDataUpdate_t> m_LobbyDataUpdate;
     protected Callback<LobbyEnter_t> m_LobbyEntered;
     protected Callback<LobbyMatchList_t> m_LobbyRequestList;
+    protected Callback<GameLobbyJoinRequested_t> m_LobbyJoinRequestFriendList;
+    protected Callback<GameRichPresenceJoinRequested_t> m_GameRichPresenceJoinRequested;
 
     #endregion
 
@@ -66,6 +68,9 @@ public class SteamLobby : MonoBehaviour
         m_LobbyDataUpdate = Callback<LobbyDataUpdate_t>.Create(OnLobbyDataUpdate);
         m_LobbyEntered = Callback<LobbyEnter_t>.Create(OnLobbyEntered);
         m_LobbyRequestList = Callback<LobbyMatchList_t>.Create(OnLobbyRequestList);
+        m_LobbyJoinRequestFriendList = Callback<GameLobbyJoinRequested_t>.Create(OnLobbyJoinRequestedFriendList);
+        m_GameRichPresenceJoinRequested = Callback<GameRichPresenceJoinRequested_t>.Create(OnGameRichPresenceJoinRequested);
+
     }
 
     void CreateCallResults()
@@ -104,7 +109,7 @@ public class SteamLobby : MonoBehaviour
     {
         if (SteamManager.Initialized)
         {
-            SteamMatchmaking.AddRequestLobbyListDistanceFilter(ELobbyDistanceFilter.k_ELobbyDistanceFilterClose);
+            SteamMatchmaking.AddRequestLobbyListDistanceFilter(ELobbyDistanceFilter.k_ELobbyDistanceFilterDefault);
             SteamMatchmaking.RequestLobbyList();
         }
     }
@@ -232,7 +237,9 @@ public class SteamLobby : MonoBehaviour
         EResult result = pCallBack.m_eResult;
         CSteamID createdLobbyId = (CSteamID) pCallBack.m_ulSteamIDLobby;
 
-        Debug.Log($"OnLobbyCreated | Result : {result} | Lobby ID : {createdLobbyId}");
+        bool successJoinable = SteamMatchmaking.SetLobbyJoinable(createdLobbyId, true);
+
+        Debug.Log($"OnLobbyCreated | Result : {result} | Lobby ID : {createdLobbyId} | Joinable Succes : {successJoinable}");
     }
 
     void OnLobbyDataUpdate(LobbyDataUpdate_t pCallBack)
@@ -287,6 +294,23 @@ public class SteamLobby : MonoBehaviour
         uint matched_lobbies = pCallBack.m_nLobbiesMatching;
 
         Debug.Log($"OnLobbyRequestList | Number of Matching Lobbies : {matched_lobbies}");
+    }
+
+    void OnLobbyJoinRequestedFriendList(GameLobbyJoinRequested_t pCallBack)
+    {
+        CSteamID requestedLobbyID = pCallBack.m_steamIDLobby;
+        CSteamID throughFriendID = pCallBack.m_steamIDFriend;
+
+        Debug.Log($"User {(uint)throughFriendID} tried to join the lobby : {(uint)requestedLobbyID}");
+        STEAMAPIMANAGER.instance.JoinLobby(requestedLobbyID);
+    }
+
+    void OnGameRichPresenceJoinRequested(GameRichPresenceJoinRequested_t pCallback)
+    {
+        CSteamID throughFriendID = pCallback.m_steamIDFriend;
+        string gamePresenceStatus = pCallback.m_rgchConnect;
+
+        Debug.Log($"User {(uint)throughFriendID} requested join with game rich presence. Status : {gamePresenceStatus}");
     }
 
     #endregion
