@@ -2,10 +2,12 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Steamworks;
+using System.Text;
+using UnityEngine.SceneManagement;
 
 public class SteamLobby : MonoBehaviour
 {
-    [SerializeField] SteamNetwork network;
+    public SteamNetwork m_network_manager = null;
 
     #region callbacks
 
@@ -15,6 +17,8 @@ public class SteamLobby : MonoBehaviour
     protected Callback<LobbyDataUpdate_t> m_LobbyDataUpdate;
     protected Callback<LobbyEnter_t> m_LobbyEntered;
     protected Callback<LobbyMatchList_t> m_LobbyRequestList;
+    protected Callback<GameLobbyJoinRequested_t> m_LobbyJoinRequestFriendList;
+    protected Callback<GameRichPresenceJoinRequested_t> m_GameRichPresenceJoinRequested;
 
     #endregion
 
@@ -35,20 +39,21 @@ public class SteamLobby : MonoBehaviour
         
     }
 
-    void OnEnable()
+    public void InitAPI()
     {
         if (SteamManager.Initialized)
         {
-            Debug.Log($"SteamLobby.cs has been Enabled");
-
             CreateCallbacks();
             CreateCallResults();
         }
     }
 
+    void OnEnable()
+    {
+    }
+
     void OnDisable()
     {
-
     }
 
     #endregion
@@ -63,41 +68,40 @@ public class SteamLobby : MonoBehaviour
         m_LobbyDataUpdate = Callback<LobbyDataUpdate_t>.Create(OnLobbyDataUpdate);
         m_LobbyEntered = Callback<LobbyEnter_t>.Create(OnLobbyEntered);
         m_LobbyRequestList = Callback<LobbyMatchList_t>.Create(OnLobbyRequestList);
+        m_LobbyJoinRequestFriendList = Callback<GameLobbyJoinRequested_t>.Create(OnLobbyJoinRequestedFriendList);
+        m_GameRichPresenceJoinRequested = Callback<GameRichPresenceJoinRequested_t>.Create(OnGameRichPresenceJoinRequested);
 
-        Debug.Log("Callbacks created successfully");
     }
 
     void CreateCallResults()
     {
-        Debug.Log("Callresults created successfully");
     }
 
-    public void CreateLobby(Steamworks.ELobbyType type, int maxMembers)
+    public void CreateLobby(string lobbyName, ELobbyType type, int maxMembers)
     {
         // ! network.user.LobbyID is already done in EnterLobby_t and LobbyCreated_t Callbacks !
 
-        Debug.Log("CreatedLobby method entered.. Attempting to create lobby");
+        if(lobbyName == "")
+        {
+            Debug.Log("Lobby name must have a valid value");
+            return;
+        }
 
-        if(type != Steamworks.ELobbyType.k_ELobbyTypePrivate &&
-            type != Steamworks.ELobbyType.k_ELobbyTypePublic &&
-            type != Steamworks.ELobbyType.k_ELobbyTypeFriendsOnly &&
-            type != Steamworks.ELobbyType.k_ELobbyTypeInvisible)
+        if(type != ELobbyType.k_ELobbyTypePrivate &&
+            type != ELobbyType.k_ELobbyTypePublic &&
+            type != ELobbyType.k_ELobbyTypeFriendsOnly &&
+            type != ELobbyType.k_ELobbyTypeInvisible)
         {
             Debug.Log("Invalid type, returning");
             return;
         }
-        else
-        {
-            Debug.Log("Valid type, trying to create a lobby");
-        }
 
-        if( network.user.hasLobby )
+        if( m_network_manager.user.hasLobby )
         {
             Debug.Log("User already has a lobby, leaving..");
             LeaveLobby();
         }
 
-        Debug.Log("Creating..");
         SteamMatchmaking.CreateLobby(type, maxMembers);
     }
     
@@ -105,7 +109,7 @@ public class SteamLobby : MonoBehaviour
     {
         if (SteamManager.Initialized)
         {
-            SteamMatchmaking.AddRequestLobbyListDistanceFilter(Steamworks.ELobbyDistanceFilter.k_ELobbyDistanceFilterClose);
+            SteamMatchmaking.AddRequestLobbyListDistanceFilter(ELobbyDistanceFilter.k_ELobbyDistanceFilterDefault);
             SteamMatchmaking.RequestLobbyList();
         }
     }
@@ -114,22 +118,23 @@ public class SteamLobby : MonoBehaviour
     {
         if (SteamManager.Initialized)
         {
-            if ( network.user.hasLobby )
+            if (m_network_manager.user.hasLobby )
             {
-                Debug.Log($"Lobby ID {network.user.LobbyID} has been left");
-                SteamMatchmaking.LeaveLobby(network.user.LobbyID);
-                network.user.LobbyID = (Steamworks.CSteamID) 0;
+                Debug.Log($"Lobby ID {m_network_manager.user.LobbyID} has been left");
+                STEAMAPIMANAGER.instance.SendLobbyMessage(STEAMAPIMANAGER.SteamCustomCodes.STEAM_LOBBY_PLAYER_LEFT.ToString());
+                SteamMatchmaking.LeaveLobby(m_network_manager.user.LobbyID);
+                m_network_manager.user.LobbyID = (CSteamID) 0;
             }
         }
     }
 
-    public void JoinLobby(Steamworks.CSteamID lobbyId)
+    public void JoinLobby(CSteamID lobbyId)
     {
-        // ! network.user.LobbyID is already done in EnterLobby_t and LobbyCreated_t Callbacks !
+        // ! m_network_manager.user.LobbyID is already done in EnterLobby_t and LobbyCreated_t Callbacks !
 
         if (SteamManager.Initialized)
         {
-            if ( network.user.hasLobby )
+            if (m_network_manager.user.hasLobby )
             {
                 LeaveLobby();
             }
@@ -154,11 +159,46 @@ public class SteamLobby : MonoBehaviour
         ///m_iChatID uint32  The index of the chat entry to use with GetLobbyChatEntry, this is not valid outside of the scope of this callback and should never be stored.
         /// </summary>
 
-        uint lobby_id = (uint)pCallBack.m_ulSteamIDLobby;
-        uint steamuser_id = (uint)pCallBack.m_ulSteamIDUser;
-        uint entry_type = pCallBack.m_eChatEntryType;
+        CSteamID lobby_id = (CSteamID)pCallBack.m_ulSteamIDLobby;
+        CSteamID steamuser_id = (CSteamID)pCallBack.m_ulSteamIDUser;
+        EChatEntryType entry_type = (EChatEntryType)pCallBack.m_eChatEntryType;
+        uint message_id = pCallBack.m_iChatID;
 
-        Debug.Log($"ChatMsgReceived | Lobby ID : {lobby_id} | SteamUser_ID : {steamuser_id} | chatEntry : {entry_type}");
+        string sMessage;
+        byte[] bytes = new byte[4096];
+        SteamMatchmaking.GetLobbyChatEntry(lobby_id, (int)message_id, out steamuser_id, bytes, 4096, out entry_type);
+        sMessage = Encoding.Default.GetString(bytes);
+
+        Debug.Log($"ChatMsgReceived | Lobby ID : {(uint)lobby_id} | SteamUser_ID : {(uint)steamuser_id} | chatEntry : {(uint)entry_type}");
+
+        //string.Compare(str1, str2);
+
+        if(string.Compare(sMessage, STEAMAPIMANAGER.SteamCustomCodes.STEAM_LOBBY_PLAYERS_COUNT_VALID_GAMESTART.ToString() ) == 0)
+        {
+            SceneManager.LoadScene("Level01");
+            return;
+        }
+        else if(string.Compare(sMessage, STEAMAPIMANAGER.SteamCustomCodes.STEAM_LOBBY_PLAYERS_COUNT_INVALID_ABORT.ToString()) == 0)
+        {
+            Debug.Log("TOO FEW PLAYERS IN LOBBY");
+            return;
+        }
+        else if(string.Compare(sMessage, STEAMAPIMANAGER.SteamCustomCodes.STEAM_LOBBY_PLAYER_ENTERED.ToString()) == 0)
+        {
+            Debug.Log("A PLAYER ENTERED THE LOBBY");
+            return;
+        }
+        else if(string.Compare(sMessage, STEAMAPIMANAGER.SteamCustomCodes.STEAM_LOBBY_PLAYER_LEFT.ToString()) == 0)
+        {
+            Debug.Log("A PLAYER LEFT THE LOBBY");
+            return;
+        }
+        else
+        {
+            Debug.Log($"Message : {sMessage}"); 
+            return;
+        }
+
     }
 
     void OnLobbyChatUpdate(LobbyChatUpdate_t pCallBack)
@@ -194,10 +234,12 @@ public class SteamLobby : MonoBehaviour
         ///m_ulSteamIDLobby uint64  The Steam ID of the lobby that was created, 0 if failed.
         ///</summary>
         
-        Steamworks.EResult result = pCallBack.m_eResult;
-        Steamworks.CSteamID createdLobbyId = (Steamworks.CSteamID) pCallBack.m_ulSteamIDLobby;
+        EResult result = pCallBack.m_eResult;
+        CSteamID createdLobbyId = (CSteamID) pCallBack.m_ulSteamIDLobby;
 
-        Debug.Log($"OnLobbyCreated | Result : {result} | Lobby ID : {createdLobbyId} | User Lobby ID : {network.user.LobbyID}");
+        bool successJoinable = SteamMatchmaking.SetLobbyJoinable(createdLobbyId, true);
+
+        Debug.Log($"OnLobbyCreated | Result : {result} | Lobby ID : {createdLobbyId} | Joinable Succes : {successJoinable}");
     }
 
     void OnLobbyDataUpdate(LobbyDataUpdate_t pCallBack)
@@ -208,11 +250,11 @@ public class SteamLobby : MonoBehaviour
         ///m_bSuccess uint8   true if the lobby data was successfully changed, otherwise false.
         ///</summary>
         
-        uint lobby_id = (uint) pCallBack.m_ulSteamIDLobby;
-        uint member_steam_id = (uint) pCallBack.m_ulSteamIDMember;
+        CSteamID lobby_id = (CSteamID)pCallBack.m_ulSteamIDLobby;
+        CSteamID member_steam_id =  (CSteamID)pCallBack.m_ulSteamIDMember;
         byte success = pCallBack.m_bSuccess;
 
-        Debug.Log($"OnLobbyDataUpdate | Lobby ID : {lobby_id} | Member ID : {member_steam_id} | Success : {success}");
+        Debug.Log($"OnLobbyDataUpdate | Lobby ID : {(uint)lobby_id} | Member ID : {(uint)member_steam_id} | Success : {success} | With {SteamMatchmaking.GetNumLobbyMembers(lobby_id)} members in lobby");
     }
 
     void OnLobbyEntered(LobbyEnter_t pCallBack)
@@ -228,13 +270,19 @@ public class SteamLobby : MonoBehaviour
         /// 
         ///</summary>
 
-        Steamworks.CSteamID enteredLobbyId = (Steamworks.CSteamID) pCallBack.m_ulSteamIDLobby;
+        CSteamID enteredLobbyId = (CSteamID) pCallBack.m_ulSteamIDLobby;
         bool locked = pCallBack.m_bLocked;
         uint response = pCallBack.m_EChatRoomEnterResponse;
 
-        network.user.LobbyID = enteredLobbyId;
+        m_network_manager.user.LobbyID = enteredLobbyId;
 
-        Debug.Log($"OnLobbyEntered | Lobby ID : {enteredLobbyId} | Locked : {locked} | Response : {response} | User Lobby : {network.user.LobbyID}");
+        Debug.Log($"OnLobbyEntered | Lobby ID : {enteredLobbyId} | Locked : {locked} | Response : {response} | User Lobby : {m_network_manager.user.LobbyID}");
+
+        if (m_network_manager.user.steamid != STEAMAPIMANAGER.instance.GetLobbyHostSteamID())
+        {
+            STEAMAPIMANAGER.instance.SendLobbyMessage("entered");
+            SceneManager.LoadScene("JoinedLobbyMenu");
+        }
     }
 
     void OnLobbyRequestList(LobbyMatchList_t pCallBack)
@@ -246,6 +294,23 @@ public class SteamLobby : MonoBehaviour
         uint matched_lobbies = pCallBack.m_nLobbiesMatching;
 
         Debug.Log($"OnLobbyRequestList | Number of Matching Lobbies : {matched_lobbies}");
+    }
+
+    void OnLobbyJoinRequestedFriendList(GameLobbyJoinRequested_t pCallBack)
+    {
+        CSteamID requestedLobbyID = pCallBack.m_steamIDLobby;
+        CSteamID throughFriendID = pCallBack.m_steamIDFriend;
+
+        Debug.Log($"User {(uint)throughFriendID} tried to join the lobby : {(uint)requestedLobbyID}");
+        STEAMAPIMANAGER.instance.JoinLobby(requestedLobbyID);
+    }
+
+    void OnGameRichPresenceJoinRequested(GameRichPresenceJoinRequested_t pCallback)
+    {
+        CSteamID throughFriendID = pCallback.m_steamIDFriend;
+        string gamePresenceStatus = pCallback.m_rgchConnect;
+
+        Debug.Log($"User {(uint)throughFriendID} requested join with game rich presence. Status : {gamePresenceStatus}");
     }
 
     #endregion
