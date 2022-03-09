@@ -30,17 +30,22 @@ public class Level01Handler : MonoBehaviour
                         if (STEAMAPIMANAGER.instance.network_manager.user.steamid != STEAMAPIMANAGER.instance.GetLobbyHostSteamID())
                         {
                             GameObject player2 = Instantiate(playerPrefab, new Vector3(0, 0, 0), Quaternion.identity);
-                            player2.GetComponent<PlayerController>().playerBodyObject.GetComponent<MeshRenderer>().material = player2Material;
+                            player2.GetComponent<MeshRenderer>().material = player2Material;
                             player2.transform.SetParent(playersContainer.transform);
                             player2.transform.localPosition = new Vector3(10,10,10);
 
                             player2.GetComponent<BunnyHopper>().playerID = 2;
                             player2.GetComponent<BunnyHopper>().controlled = true;
+
+                            Debug.Log($"Player 2 is activated : {player2.GetComponent<BunnyHopper>().controlled} his ID : {player2.GetComponent<BunnyHopper>().playerID}");
                         }
                     }
                 }
             }
         }
+
+        Cursor.visible = false;
+        Cursor.lockState = CursorLockMode.Locked;
     }
 
     // Start is called before the first frame update
