@@ -5,6 +5,8 @@ using UnityEngine.SceneManagement;
 
 public class Level01Handler : MonoBehaviour
 {
+    public bool disabled = false;
+
     public GameObject playersContainer; //player container object in Level01
     public GameObject pauseMenu; //pauseMenu gameobject in Level01
     public GameObject playerPrefab; //playerPrefab
@@ -17,21 +19,24 @@ public class Level01Handler : MonoBehaviour
     //SPAWN A PLAYER 2 OBJECT IN GAME AND MAKE IT CONTROLLABLE WITH <>.controller = true; line 35
     private void Awake()
     {
-        if (Steamworks.SteamAPI.Init())
+        if (!disabled)
         {
-            if (STEAMAPIMANAGER.instance.IsInitialized())
+            if (Steamworks.SteamAPI.Init())
             {
-                if (STEAMAPIMANAGER.instance.network_manager.user.hasLobby)
+                if (STEAMAPIMANAGER.instance != null && STEAMAPIMANAGER.instance.IsInitialized())
                 {
-                    if (STEAMAPIMANAGER.instance.network_manager.user.steamid != STEAMAPIMANAGER.instance.GetLobbyHostSteamID())
+                    if (STEAMAPIMANAGER.instance.network_manager.user.hasLobby)
                     {
-                        GameObject player2 = Instantiate(playerPrefab, new Vector3(0, 0, 0), Quaternion.identity);
-                        player2.GetComponent<PlayerController>().playerBodyObject.GetComponent<MeshRenderer>().material = player2Material;
-                        player2.transform.SetParent(playersContainer.transform);
-                        player2.transform.localPosition = new Vector3(10,10,10);
+                        if (STEAMAPIMANAGER.instance.network_manager.user.steamid != STEAMAPIMANAGER.instance.GetLobbyHostSteamID())
+                        {
+                            GameObject player2 = Instantiate(playerPrefab, new Vector3(0, 0, 0), Quaternion.identity);
+                            player2.GetComponent<PlayerController>().playerBodyObject.GetComponent<MeshRenderer>().material = player2Material;
+                            player2.transform.SetParent(playersContainer.transform);
+                            player2.transform.localPosition = new Vector3(10,10,10);
 
-                        player2.GetComponent<PlayerController>().playerID = 2;
-                        player2.GetComponent<PlayerController>().controlled = true;
+                            player2.GetComponent<BunnyHopper>().playerID = 2;
+                            player2.GetComponent<BunnyHopper>().controlled = true;
+                        }
                     }
                 }
             }
