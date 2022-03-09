@@ -5,8 +5,13 @@ using Steamworks;
 
 public class SteamNetwork : MonoBehaviour
 {
+    // TAKE THE REFERENCE OF THE LOBBY MANAGER
     public SteamLobby m_lobby_manager = null;
 
+
+    //STRUCTURE TO STORE THE USER INFORMATIONS
+    //ALL DATAS WILL BE STORED IN ONE PLACE
+    //CONCERN ONLY THE LOCAL CONCERN
     public struct s_SteamUser
     {
         public CSteamID steamid { get; private set; }
@@ -53,6 +58,7 @@ public class SteamNetwork : MonoBehaviour
         public override string ToString() => $"USER ID : {steamid} | USER NAME : {username} | IS IN LOBBY : {hasLobby} | LOBBY ID : {LobbyID}";
     }
 
+    //DECLARATION OF THE USER
     public s_SteamUser user;
 
     #region callbacks
@@ -71,13 +77,8 @@ public class SteamNetwork : MonoBehaviour
 
     #region builtin-methods
 
-    // Start is called before the first frame update
-    void Start()
-    {
-
-    }
-
     // Update is called once per frame
+    // USED ONLY TO CHECK IF THE PLAYER REQUEST PLAYERS PLAYING THE SAME APPID
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.Space))
@@ -87,7 +88,10 @@ public class SteamNetwork : MonoBehaviour
         }
     }
 
-
+    //INIT THE NETWORK API
+    //CREATE CALLBACKS AND CALLRESULT
+    //ENABLE LISTENING FOR FRIENDS MESSAGE SO THAT WE CAN USE THE "AUTOREPLY" METHOD AND "FRIENDSMESSAGE" CALLBACKS
+    //>! AUTOREPLY METHOD IS DISABLED, TO BE USED CAREFULLY AND FOR DEBUG PURPOSES !<
     public void InitAPI()
     {
         if (SteamManager.Initialized)
@@ -106,29 +110,10 @@ public class SteamNetwork : MonoBehaviour
             //SteamID which can be converted to CSteamID later
             user = s_SteamUser.Init(SteamUser.GetSteamID(), SteamFriends.GetPersonaName());
 
-            //if (m_lobby_manager != null)
-            //{
-            //    Debug.Log("Making an attempt to create a lobby with 5 max_players");
-            //    m_lobby_manager.CreateLobby(Steamworks.ELobbyType.k_ELobbyTypePublic, 5);
-            //}
-            //else
-            //{
-            //    Debug.Log("Lobby Manager is null");
-            //}
-
             Debug.Log(user.ToString());
         }
     }
 
-    void OnEnable()
-    {
-        
-    }
-
-    void OnDisable()
-    {
-
-    }
     #endregion
 
     #region logic
@@ -144,21 +129,22 @@ public class SteamNetwork : MonoBehaviour
         m_CurrentPlayers = CallResult<NumberOfCurrentPlayers_t>.Create(OnPlayersRequested);
     }
 
-    void AutoReply(CSteamID senderID, string message)
-    {
-        if(message == "invite me" || message == "inv me" || message == "invite moi" || message == "inv moi")
-        {
-            SteamFriends.ReplyToFriendMessage(senderID, "Got It !");
-            InviteFriendToPlay(senderID);
-            
-            Debug.Log($"Replied to { SteamFriends.GetFriendPersonaName(senderID) } and sent an invite");
-            return;
-        }
+    //void AutoReply(CSteamID senderID, string message)
+    //{
+    //    if(message == "invite me" || message == "inv me" || message == "invite moi" || message == "inv moi")
+    //    {
+    //        SteamFriends.ReplyToFriendMessage(senderID, "Got It !");
+    //        InviteFriendToPlay(senderID);
+    //        
+    //        Debug.Log($"Replied to { SteamFriends.GetFriendPersonaName(senderID) } and sent an invite");
+    //        return;
+    //    }
+    //
+    //    SteamFriends.ReplyToFriendMessage(senderID, message);
+    //   Debug.Log("Replied to " + SteamFriends.GetFriendPersonaName(senderID) + " " + senderID + " with " + message );
+    //}
 
-        SteamFriends.ReplyToFriendMessage(senderID, message);
-        Debug.Log("Replied to " + SteamFriends.GetFriendPersonaName(senderID) + " " + senderID + " with " + message );
-    }
-
+    //THIS METHOD TAKES AN USER STEAMID AND INVITE HIM TO LOBBY IF LOBBY VALID
     void InviteFriendToPlay(CSteamID friendIdToInvite)
     {
         if( (uint) user.LobbyID == 0 )
@@ -172,6 +158,7 @@ public class SteamNetwork : MonoBehaviour
             return;
         }
 
+        //INVITING USER AND DISPLAY DEBUG MESSAGE
         SteamMatchmaking.InviteUserToLobby(user.LobbyID, friendIdToInvite);
         Debug.Log($"{ SteamFriends.GetFriendPersonaName(friendIdToInvite) } has been Invited to play! Lobby ID : { user.LobbyID }");
     }
@@ -180,6 +167,10 @@ public class SteamNetwork : MonoBehaviour
 
     #region callbacks-results
 
+    //OVERLAY
+    //DOES NOT WORK BECAUSE UNITY(?)
+    //WORKS IF WE HIT <BUILD AND RUN> IN UNITY
+    //DOES NOT WORK IN UNITY EDITOR ; DOES NOT WORK WHEN PROJECT IS BUILT
     void OnGameOverlayActivated(GameOverlayActivated_t pCallBack)
     {
         if(pCallBack.m_bActive != 0)
@@ -192,6 +183,7 @@ public class SteamNetwork : MonoBehaviour
         }
     }
 
+    //WHEN WE RECEIVE A MESSAGE FROM A FRIEND...
     void OnGameConnectedFriendChatMsg(GameConnectedFriendChatMsg_t pCallBack)
     {
         CSteamID senderID = pCallBack.m_steamIDUser;
@@ -200,16 +192,18 @@ public class SteamNetwork : MonoBehaviour
         EChatEntryType entry = EChatEntryType.k_EChatEntryTypeInvalid;
         string msg;
 
+        //STORE FRIEND MESSAGE AS STRING INTO msg VARIABLE <string>
         SteamFriends.GetFriendMessage(senderID, messageID, out msg, 4096, out entry);
 
+        //IF THE TYPE OF MESSAGE IS A VALID TEXT MESSAGE, PRINT DEBUG INFORMATIONS/RESULTS
         if (entry == Steamworks.EChatEntryType.k_EChatEntryTypeChatMsg)
         {
             Debug.Log("Message received from " + SteamFriends.GetFriendPersonaName(senderID) + " " + senderID + " ID : " + messageID);
-            //AutoReply(senderID, msg);
+            //AutoReply(senderID, msg); //DISABLE IT
         }
     }
 
-    // space to trigger
+    // space to trigger request number of player playing current game appid
     void OnPlayersRequested(NumberOfCurrentPlayers_t pCallBack, bool bIOFailure)
     {
         if(pCallBack.m_bSuccess != 1 || bIOFailure)
