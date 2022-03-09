@@ -2,6 +2,12 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Author : DRUCKES Lucas
+/// Initial player controller class
+/// Handles basic movements and camera movements
+/// </summary>
+
 public class PlayerController : MonoBehaviour
 {
     public int playerID = 0; //useless?

@@ -5,6 +5,13 @@ using Steamworks;
 using System.Text;
 using UnityEngine.SceneManagement;
 
+/// <summary>
+/// Author : DRUCKES Lucas
+/// This class handles everything lobby related.
+/// It has all lobby callbacks, lobby methods as CreateLobby, LeaveLobby and such methods.
+/// All the callbacks are in #callback-results region near line 150
+/// </summary>
+
 public class SteamLobby : MonoBehaviour
 {
     //TAKE THE REFERENCE OF NETWORK MANAGER IN EDITOR

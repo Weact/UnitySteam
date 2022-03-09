@@ -4,6 +4,18 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
+/// <summary>
+/// Author : DRUCKES Lucas
+/// Multiple menus are being handled in this script
+/// 
+/// LobbyCreation : if player click on CreateLobby, we deactivate the basic multiplayer menu and activate the lobbycreation menu
+/// Player will be then able to input a lobby name and lobby type.
+/// 
+/// JoinLobby : if player click on JoinLobby, we deactivate the basic multiplayer menu and activate the joinlobby menu
+/// Player will be able to see a lot of lobby and join any of them. (NOT IMPLEMENTED)
+/// 
+/// </summary>
+
 public class MultiplayerMenu : MonoBehaviour
 {
     private struct LobbyInfo

@@ -3,6 +3,14 @@ using System.Collections.Generic;
 using UnityEngine;
 using Steamworks;
 
+/// <summary>
+/// Author: DRUCKES Lucas
+/// This class handles everything user related.
+/// A structure in this class stores user's steamid, username, if he has a lobby or not, and obviously, the lobbyID if there is one.
+/// a user is created line 70
+/// 
+/// </summary>
+
 public class SteamNetwork : MonoBehaviour
 {
     // TAKE THE REFERENCE OF THE LOBBY MANAGER

@@ -2,6 +2,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+
+/// <summary>
+/// This class handles everything related to when someone join the lobby
+/// It will directly redirect the player to a Waiting screen, until the host of the lobby start the game
+/// In this script, we set the lobby name and host's name to some UI text elements. From start method.
+/// </summary>
+
 public class JoinedLobbyScript : MonoBehaviour
 {
     public TMPro.TMP_Text lobbyHostName;

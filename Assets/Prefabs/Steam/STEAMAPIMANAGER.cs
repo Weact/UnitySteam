@@ -5,6 +5,13 @@ using Steamworks;
 using System;
 using System.Text;
 
+/// <summary>
+/// AUTHOR: DRUCKES Lucas
+/// This class has been made to handle "global" network purposes
+/// It has network and lobby managers references so it can call methods from there directly
+/// This class is mainly used to be called from outside, since it is a DontDestroy Game object and a Singleton.
+/// </summary>
+/// 
 public class STEAMAPIMANAGER : MonoBehaviour
 {
     //THIS CLASS WILL HANDLE BASIC NETWORK BEHAVIOR

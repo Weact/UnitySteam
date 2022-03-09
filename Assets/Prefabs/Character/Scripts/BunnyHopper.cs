@@ -5,6 +5,20 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
+/// <summary>
+/// Author : DRUCKES Lucas
+/// Script taken/inspired from github repository https://github.com/TheAsuro/VelocityMovement (thanks to him!)
+/// 
+/// A first version of a PlayerController has been made in Prefabs/Character/Scripts/PlayerController.cs.
+/// Thus, this script does not have the bunny hop feature and does not require a Camera Script as it handles it on its own.
+/// 
+/// This script will handle everything player related. Ground speed, air speed, air acceleration etc..
+/// Also, will check if the game is multiplayer and gives the control to the player according to its role.
+/// 
+/// Suggest reading https://www.reddit.com/r/Unity3D/comments/2vwcuw/bunnyhopping_from_the_programmers_perspective_an/ for a better understand of Bunny Hop if you wish
+/// as multiple mathematics vector notions are used, such as Dot product.
+/// </summary>
+
 public class BunnyHopper : MonoBehaviour
 {
     public int playerID = 0;
@@ -26,8 +40,6 @@ public class BunnyHopper : MonoBehaviour
 
     [Header("UI_Speed")]
     public TMPro.TMP_Text textSpeedUI;
-
-    public GameObject deathArea;
 
 
     //MAKE THE PLAYER CONTROLLABLE ACCORDING TO IF ITS A MULTIPLAYER GAME OR LOCAL GAME, AND PLAYER
@@ -105,12 +117,11 @@ public class BunnyHopper : MonoBehaviour
 
     private void CheckShouldDie()
     {
-        if(gameObject.transform.position.y < -5.0f)
+        if (gameObject.transform.position.y < -5.0f)
         {
             gameObject.transform.position = new Vector3(10f, 5f, -10f);
         }
     }
-
     private Vector3 CalculateFriction(Vector3 currentVelocity)
     {
         onGround = CheckGround();

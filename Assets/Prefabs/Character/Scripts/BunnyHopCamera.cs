@@ -2,6 +2,14 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Author : DRUCKES Lucas
+/// Script taken/inspired from github repository https://github.com/TheAsuro/VelocityMovement (thanks to him!)
+/// 
+/// This script will handles the camera of the player.
+/// Prevents the camera from looking too high or too low, handles mouse sensitivity and mouse axes inverts.
+/// </summary>
+
 [AddComponentMenu("Camera-Control/Mouse Look")]
 public class BunnyHopCamera : MonoBehaviour
 {

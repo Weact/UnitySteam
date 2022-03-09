@@ -4,6 +4,13 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using Steamworks;
 
+/// <summary>
+/// Author : DRUCKES Lucas
+/// This script handles the start of the game when a lobby has been created
+/// If the lobby has 2 members (host + someone joined), the host will be able to start the game
+/// Otherwise, the host must wait for a friend to join in order to start the game
+/// </summary>
+
 public class LobbyMenu : MonoBehaviour
 {
     public TMPro.TMP_Text LobbyMemberHostLabel;

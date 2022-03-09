@@ -3,6 +3,13 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
+/// <summary>
+/// Author : DRUCKES Lucas
+/// This class handles Level related events
+/// For example in Awake methods: enable player 2 controls if the game is started from multiplayer and user has lobby, etc...
+/// Other than that, its purpose its just to pause, resume or leave the game.
+/// </summary>
+
 public class Level01Handler : MonoBehaviour
 {
     public bool disabled = false;
