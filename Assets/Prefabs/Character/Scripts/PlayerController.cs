@@ -4,13 +4,14 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
-    public int playerID = 0;
-    public bool controlled = false;
+    public int playerID = 0; //useless?
+    public bool controlled = false; //if false, player won't be able to move this object
+    public GameObject playerBodyObject; //get the cylinder gameobject to change its material
 
     public Transform playerCamera = null;
     public float mouseSensitivity = 3.5f;
     public float walkSpeed = 6.0f;
-    public float runSpeed = 15.0f;
+    public float runSpeed = 15.0f; //when shift is pressed
     public float gravity = -13.0f;
     public float jumpForce = 10.0f;
 
@@ -31,6 +32,7 @@ public class PlayerController : MonoBehaviour
     Vector2 currentMouseDeltaVelocity = Vector2.zero;
 
     // Start is called before the first frame update
+    //MAKE THE PLAYER CONTROLLABLE ACCORDING TO IF ITS A MULTIPLAYER GAME OR LOCAL GAME, AND PLAYER
     void Start()
     {
         if (STEAMAPIMANAGER.instance != null)

@@ -8,6 +8,8 @@ public class MainMenu : MonoBehaviour
 
     public TMPro.TMP_Text LobbyErrorMultiplayer;
     public GameObject multiplayerButton;
+
+    //DISABLE MULTIPLAYER BUTTON IF STEAMAPI FAILED TO INITIALIZE
     private void Start()
     {
         if (!Steamworks.SteamAPI.Init())
@@ -32,6 +34,7 @@ public class MainMenu : MonoBehaviour
         SceneManager.LoadScene("MultiplayerMenu");
     }
     
+    //QUIT GAME AND MAKE SURE TO LEAVE LOBBY
     public void QuitGame()
     {
         if (STEAMAPIMANAGER.instance != null)
