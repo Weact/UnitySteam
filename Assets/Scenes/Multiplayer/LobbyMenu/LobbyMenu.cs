@@ -20,7 +20,6 @@ public class LobbyMenu : MonoBehaviour
 
                 if (LobbyMemberHostLabel == null || LobbyMemberSecondLabel == null)
                 {
-                    Debug.Log("bullshit software");
                     return;
                 }
 

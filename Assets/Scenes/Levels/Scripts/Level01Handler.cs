@@ -5,13 +5,30 @@ using UnityEngine.SceneManagement;
 
 public class Level01Handler : MonoBehaviour
 {
+    public GameObject playersContainer;
     public GameObject pauseMenu;
+    public GameObject playerPrefab;
+    public Material player2Material;
 
     private bool paused = false;
 
     private void Awake()
     {
-        
+        if (Steamworks.SteamAPI.Init())
+        {
+            if (STEAMAPIMANAGER.instance.IsInitialized())
+            {
+                if (STEAMAPIMANAGER.instance.network_manager.user.steamid != STEAMAPIMANAGER.instance.GetLobbyHostSteamID())
+                {
+                    GameObject player2 = Instantiate(playerPrefab, new Vector3(0, 0, 0), Quaternion.identity);
+                    player2.GetComponent<PlayerController>().playerBodyObject.GetComponent<MeshRenderer>().material = player2Material;
+                    player2.transform.SetParent(playersContainer.transform);
+
+                    //player2.GetComponent<PlayerController>().playerID = 2;
+                    //player2.GetComponent<PlayerController>().controlled = true;
+                }
+            }
+        }
     }
 
     // Start is called before the first frame update

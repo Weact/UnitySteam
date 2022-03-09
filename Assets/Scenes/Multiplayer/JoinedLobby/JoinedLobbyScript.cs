@@ -14,6 +14,7 @@ public class JoinedLobbyScript : MonoBehaviour
         {
             if (STEAMAPIMANAGER.instance.IsInitialized())
             {
+                Debug.Log($"Host Name : {STEAMAPIMANAGER.instance.GetLobbyHostUsername()} | Lobby Name : {STEAMAPIMANAGER.instance.GetLobbyName()}");
                 lobbyHostName.SetText(STEAMAPIMANAGER.instance.GetLobbyHostUsername());
                 lobbyHostName.SetText(STEAMAPIMANAGER.instance.GetLobbyName());
                 STEAMAPIMANAGER.instance.SendLobbyMessage(STEAMAPIMANAGER.SteamCustomCodes.STEAM_LOBBY_PLAYER_ENTERED.ToString());

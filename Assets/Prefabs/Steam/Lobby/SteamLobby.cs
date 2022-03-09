@@ -9,6 +9,8 @@ public class SteamLobby : MonoBehaviour
 {
     public SteamNetwork m_network_manager = null;
 
+    private string tmp_lobbyname = "";
+
     #region callbacks
 
     protected Callback<LobbyChatMsg_t> m_LobbyChatMsgReceived;
@@ -103,6 +105,7 @@ public class SteamLobby : MonoBehaviour
         }
 
         SteamMatchmaking.CreateLobby(type, maxMembers);
+        tmp_lobbyname = lobbyName;
     }
     
     public void SearchLobby()
@@ -238,6 +241,7 @@ public class SteamLobby : MonoBehaviour
         CSteamID createdLobbyId = (CSteamID) pCallBack.m_ulSteamIDLobby;
 
         bool successJoinable = SteamMatchmaking.SetLobbyJoinable(createdLobbyId, true);
+        SteamMatchmaking.SetLobbyData(createdLobbyId, "name", tmp_lobbyname);
 
         Debug.Log($"OnLobbyCreated | Result : {result} | Lobby ID : {createdLobbyId} | Joinable Succes : {successJoinable}");
     }

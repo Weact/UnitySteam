@@ -6,6 +6,7 @@ public class PlayerController : MonoBehaviour
 {
     public int playerID = 0;
     public bool controlled = false;
+    public GameObject playerBodyObject;
 
     public Transform playerCamera = null;
     public float mouseSensitivity = 3.5f;
