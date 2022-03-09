@@ -7,8 +7,10 @@ using UnityEngine.SceneManagement;
 
 public class SteamLobby : MonoBehaviour
 {
+    //TAKE THE REFERENCE OF NETWORK MANAGER IN EDITOR
     public SteamNetwork m_network_manager = null;
 
+    //USED TO STORE THE LOBBY NAME
     private string tmp_lobbyname = "";
 
     #region callbacks
@@ -29,18 +31,8 @@ public class SteamLobby : MonoBehaviour
 
     #region builtin-methods
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
+    //INITIALIZE LOBBY MANAGER API
+    //CREATE CALLBACKS AND CALLRESULTS IF STEAMMANAGER IS INITIALIZED
     public void InitAPI()
     {
         if (SteamManager.Initialized)
@@ -48,14 +40,6 @@ public class SteamLobby : MonoBehaviour
             CreateCallbacks();
             CreateCallResults();
         }
-    }
-
-    void OnEnable()
-    {
-    }
-
-    void OnDisable()
-    {
     }
 
     #endregion
@@ -79,6 +63,8 @@ public class SteamLobby : MonoBehaviour
     {
     }
 
+    //CALL STEAMWORKS CREATE LOBBY METHOD
+    //lobbyName<string> IS USED TO SET LOBBY'S METADATA
     public void CreateLobby(string lobbyName, ELobbyType type, int maxMembers)
     {
         // ! network.user.LobbyID is already done in EnterLobby_t and LobbyCreated_t Callbacks !
@@ -89,10 +75,10 @@ public class SteamLobby : MonoBehaviour
             return;
         }
 
-        if(type != ELobbyType.k_ELobbyTypePrivate &&
-            type != ELobbyType.k_ELobbyTypePublic &&
-            type != ELobbyType.k_ELobbyTypeFriendsOnly &&
-            type != ELobbyType.k_ELobbyTypeInvisible)
+        if(type != ELobbyType.k_ELobbyTypePrivate && //0
+            type != ELobbyType.k_ELobbyTypePublic && //1
+            type != ELobbyType.k_ELobbyTypeFriendsOnly && //2
+            type != ELobbyType.k_ELobbyTypeInvisible) //3
         {
             Debug.Log("Invalid type, returning");
             return;
@@ -108,6 +94,7 @@ public class SteamLobby : MonoBehaviour
         tmp_lobbyname = lobbyName;
     }
     
+    //SEARCH FOR LOBBIES WITH A DISTANCE FILDER SET BY DEFAULT
     public void SearchLobby()
     {
         if (SteamManager.Initialized)
@@ -117,6 +104,7 @@ public class SteamLobby : MonoBehaviour
         }
     }
 
+    //LEAVE THE CURRENT LOBBY IF THE USER IS IN A VALID LOBBY
     public void LeaveLobby()
     {
         if (SteamManager.Initialized)
@@ -124,13 +112,14 @@ public class SteamLobby : MonoBehaviour
             if (m_network_manager.user.hasLobby )
             {
                 Debug.Log($"Lobby ID {m_network_manager.user.LobbyID} has been left");
-                STEAMAPIMANAGER.instance.SendLobbyMessage(STEAMAPIMANAGER.SteamCustomCodes.STEAM_LOBBY_PLAYER_LEFT.ToString());
-                SteamMatchmaking.LeaveLobby(m_network_manager.user.LobbyID);
-                m_network_manager.user.LobbyID = (CSteamID) 0;
+                STEAMAPIMANAGER.instance.SendLobbyMessage(STEAMAPIMANAGER.SteamCustomCodes.STEAM_LOBBY_PLAYER_LEFT.ToString()); //NOTIFY ALL PLAYERS IN LOBBY
+                SteamMatchmaking.LeaveLobby(m_network_manager.user.LobbyID); //LEAVE THE LOBBY
+                m_network_manager.user.LobbyID = (CSteamID) 0; //SET THE USER'S LOBBY ID TO 0 SINCE WE LEFT
             }
         }
     }
 
+    //JOIN A LOBBY IF THE ID IS VALID AND STEAM MANAGER IS INITIALIZED
     public void JoinLobby(CSteamID lobbyId)
     {
         // ! m_network_manager.user.LobbyID is already done in EnterLobby_t and LobbyCreated_t Callbacks !
@@ -139,11 +128,11 @@ public class SteamLobby : MonoBehaviour
         {
             if (m_network_manager.user.hasLobby )
             {
-                LeaveLobby();
+                LeaveLobby(); //LEAVE LOBBY FIRST IF THE USER HAS A LOBBY ALREADY
             }
             if ( (uint) lobbyId != 0)
             {
-                SteamMatchmaking.JoinLobby(lobbyId);
+                SteamMatchmaking.JoinLobby(lobbyId); // JOIN LOBBY IS EVERYTHING WAS SUCCESSFUL
             }
         }
     }
@@ -153,6 +142,7 @@ public class SteamLobby : MonoBehaviour
 
     #region callback-results
 
+    //ON RECEIVED A MESSAGE IN LOBBY FROM A USER
     void OnLobbyChatMsgReceived(LobbyChatMsg_t pCallBack)
     {
         /// <summary>
@@ -167,15 +157,17 @@ public class SteamLobby : MonoBehaviour
         EChatEntryType entry_type = (EChatEntryType)pCallBack.m_eChatEntryType;
         uint message_id = pCallBack.m_iChatID;
 
-        string sMessage;
+        string sMessage; //STRING VARIABLE TO STORE THE MESSAGE IN
         byte[] bytes = new byte[4096];
-        SteamMatchmaking.GetLobbyChatEntry(lobby_id, (int)message_id, out steamuser_id, bytes, 4096, out entry_type);
-        sMessage = Encoding.Default.GetString(bytes);
+        SteamMatchmaking.GetLobbyChatEntry(lobby_id, (int)message_id, out steamuser_id, bytes, 4096, out entry_type); //GET MESSAGE CONTENT AS BINARY
+        sMessage = Encoding.Default.GetString(bytes); //CONVERT TO STRING
 
-        Debug.Log($"ChatMsgReceived | Lobby ID : {(uint)lobby_id} | SteamUser_ID : {(uint)steamuser_id} | chatEntry : {(uint)entry_type}");
+        Debug.Log($"ChatMsgReceived | Lobby ID : {(uint)lobby_id} | SteamUser_ID : {(uint)steamuser_id} | chatEntry : {(uint)entry_type}"); //DEBUG RESULT
 
-        //string.Compare(str1, str2);
+        //string.Compare(str1, str2); //THIS METHOD COMPARES 2 STRING OBJECT THE RIGHT WAY, WE MUST USE COMPARE
 
+
+        //BIG IF THING, USED TO COMPARE THE MESSAGE TO EACH CODES AND DO SOMETHING
         if(string.Compare(sMessage, STEAMAPIMANAGER.SteamCustomCodes.STEAM_LOBBY_PLAYERS_COUNT_VALID_GAMESTART.ToString() ) == 0)
         {
             SceneManager.LoadScene("Level01");
@@ -183,27 +175,36 @@ public class SteamLobby : MonoBehaviour
         }
         else if(string.Compare(sMessage, STEAMAPIMANAGER.SteamCustomCodes.STEAM_LOBBY_PLAYERS_COUNT_INVALID_ABORT.ToString()) == 0)
         {
-            Debug.Log("TOO FEW PLAYERS IN LOBBY");
+            // [...] DO SOMETHING IF THERE ARE TOO FEW PLAYER IN LOBBY
+            // MAYBE DISPLAY IT IN THE LOBBY SCREEN ?
+            Debug.Log("TOO FEW PLAYERS IN LOBBY"); //WE'LL JUST DEBUG MESSAGE FOR NOW
             return;
         }
         else if(string.Compare(sMessage, STEAMAPIMANAGER.SteamCustomCodes.STEAM_LOBBY_PLAYER_ENTERED.ToString()) == 0)
         {
-            Debug.Log("A PLAYER ENTERED THE LOBBY");
+            // [...] DO SOMETHING IF A PLAYER ENTERED THE LOBBY
+            // MAYBE DISPLAY IT IN THE LOBBY SCREEN ?
+            Debug.Log("A PLAYER ENTERED THE LOBBY"); //WE'LL JUST DEBUG MESSAGE FOR NOW
             return;
         }
         else if(string.Compare(sMessage, STEAMAPIMANAGER.SteamCustomCodes.STEAM_LOBBY_PLAYER_LEFT.ToString()) == 0)
         {
-            Debug.Log("A PLAYER LEFT THE LOBBY");
+            // [...] DO SOMETHING IF A PLAYER LEFT THE LOBBY
+            // MAYBE DISPLAY IT IN THE LOBBY SCREEN ?
+            Debug.Log("A PLAYER LEFT THE LOBBY"); //WE'LL JUST DEBUG MESSAGE FOR NOW
             return;
         }
         else
         {
+            // INVALID MESSAGE, JUST PRINTING IT FOR DEBUG PURPOSES
             Debug.Log($"Message : {sMessage}"); 
             return;
         }
 
     }
 
+    // WHEN LOBBY GOT CHANGEMENTS :
+    // check method summary below
     void OnLobbyChatUpdate(LobbyChatUpdate_t pCallBack)
     {
         ///<summary>
@@ -289,6 +290,13 @@ public class SteamLobby : MonoBehaviour
         }
     }
 
+    //REMINDER :
+    //TO GET ALL THE MATCHING LOBBIES :
+    //FOR LOOP AND USE GETLOBBYBYINDEX(i); i BEING THE INDEX OF THE CURRENT FOR LOOP, ITERATING THROUGH LOBBIES
+    //for(int i = 0; i < nMatchingLobbies; i++){ lobby = SteamMatchmaking.GetLobbyByIndex(i); }
+    // To do later? ...
+    // No clue on how to update lobby list in UI after we got all the lobby honestly..
+    // Started something to update in MultiplayerMenu.cs:UpdateLobbyList:72
     void OnLobbyRequestList(LobbyMatchList_t pCallBack)
     {
         ///<summary>
@@ -300,6 +308,8 @@ public class SteamLobby : MonoBehaviour
         Debug.Log($"OnLobbyRequestList | Number of Matching Lobbies : {matched_lobbies}");
     }
 
+    //WHEN WE INVITE A FRIEND TO JOIN, OR WHEN THEY JOIN BY THEMSELVES FROM FRIEND LIST
+    //WE MAKE THEM JOIN THE LOBBY IF THEY'RE VALID + LOBBY VALID
     void OnLobbyJoinRequestedFriendList(GameLobbyJoinRequested_t pCallBack)
     {
         CSteamID requestedLobbyID = pCallBack.m_steamIDLobby;
@@ -309,6 +319,7 @@ public class SteamLobby : MonoBehaviour
         STEAMAPIMANAGER.instance.JoinLobby(requestedLobbyID);
     }
 
+    // not clear on what it is, but game rich presence must be by joining with commands like +connect <ip> or by discord etc?
     void OnGameRichPresenceJoinRequested(GameRichPresenceJoinRequested_t pCallback)
     {
         CSteamID throughFriendID = pCallback.m_steamIDFriend;

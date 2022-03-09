@@ -5,39 +5,48 @@ using UnityEngine.SceneManagement;
 
 public class Level01Handler : MonoBehaviour
 {
-    public GameObject playersContainer;
-    public GameObject pauseMenu;
-    public GameObject playerPrefab;
-    public Material player2Material;
+    public GameObject playersContainer; //player container object in Level01
+    public GameObject pauseMenu; //pauseMenu gameobject in Level01
+    public GameObject playerPrefab; //playerPrefab
+    public Material player2Material; //player2Material prefab
 
-    private bool paused = false;
+    private bool paused = false; //paused game stated
 
+    //CHECKING IF ITS A MULTIPLAYER GAME :
+    //IF STEAMWORKS STEAMAPI INITIALIZED, STEAMAPIMANAGER INITIALIZED, IF PLAYER HAS LOBBY AND PLAYER IS NOT THE HOST OF THE LOBBY
+    //SPAWN A PLAYER 2 OBJECT IN GAME AND MAKE IT CONTROLLABLE WITH <>.controller = true; line 35
     private void Awake()
     {
         if (Steamworks.SteamAPI.Init())
         {
             if (STEAMAPIMANAGER.instance.IsInitialized())
             {
-                if (STEAMAPIMANAGER.instance.network_manager.user.steamid != STEAMAPIMANAGER.instance.GetLobbyHostSteamID())
+                if (STEAMAPIMANAGER.instance.network_manager.user.hasLobby)
                 {
-                    GameObject player2 = Instantiate(playerPrefab, new Vector3(0, 0, 0), Quaternion.identity);
-                    player2.GetComponent<PlayerController>().playerBodyObject.GetComponent<MeshRenderer>().material = player2Material;
-                    player2.transform.SetParent(playersContainer.transform);
+                    if (STEAMAPIMANAGER.instance.network_manager.user.steamid != STEAMAPIMANAGER.instance.GetLobbyHostSteamID())
+                    {
+                        GameObject player2 = Instantiate(playerPrefab, new Vector3(0, 0, 0), Quaternion.identity);
+                        player2.GetComponent<PlayerController>().playerBodyObject.GetComponent<MeshRenderer>().material = player2Material;
+                        player2.transform.SetParent(playersContainer.transform);
+                        player2.transform.localPosition = new Vector3(10,10,10);
 
-                    //player2.GetComponent<PlayerController>().playerID = 2;
-                    //player2.GetComponent<PlayerController>().controlled = true;
+                        player2.GetComponent<PlayerController>().playerID = 2;
+                        player2.GetComponent<PlayerController>().controlled = true;
+                    }
                 }
             }
         }
     }
 
     // Start is called before the first frame update
+    //SET THE GAME NOT PAUSED
     private void Start()
     {
         SetPauseGame(false);
     }
 
     // Update is called once per frame
+    //SWITCH PAUSED STATE IF ESCAPE IS PRESSED
     private void Update()
     {
         if (Input.GetButtonDown("PauseGame"))
@@ -46,6 +55,7 @@ public class Level01Handler : MonoBehaviour
         }
     }
 
+    //CHANGE CURSOR MODE AND VISIBILITY ACCORDING TO PAUSE STATE
     public void SetPauseGame(bool paused_state)
     {
         paused = paused_state;
@@ -62,6 +72,7 @@ public class Level01Handler : MonoBehaviour
         }
     }
 
+    //LEAVE THE GAME AND MAKES SURE THAT WE LEAVE THE LOBBY IF IT WAS A MULTIPLAYER GAME
     public void LeaveGame()
     {
         if (Steamworks.SteamAPI.Init())

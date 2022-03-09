@@ -8,6 +8,8 @@ public class JoinedLobbyScript : MonoBehaviour
     public TMPro.TMP_Text lobbyName;
 
     // Start is called before the first frame update
+    //IF STEAMAPIMANAGER INITIALIZED SUCCESSFULLY AND NOT NULL
+    //DISPLAY LOBBY INFORMATION ON THE WAITING SCREEN
     void Start()
     {
         if (STEAMAPIMANAGER.instance != null)
@@ -16,16 +18,17 @@ public class JoinedLobbyScript : MonoBehaviour
             {
                 Debug.Log($"Host Name : {STEAMAPIMANAGER.instance.GetLobbyHostUsername()} | Lobby Name : {STEAMAPIMANAGER.instance.GetLobbyName()}");
                 lobbyHostName.SetText(STEAMAPIMANAGER.instance.GetLobbyHostUsername());
-                lobbyHostName.SetText(STEAMAPIMANAGER.instance.GetLobbyName());
+                lobbyName.SetText(STEAMAPIMANAGER.instance.GetLobbyName());
                 STEAMAPIMANAGER.instance.SendLobbyMessage(STEAMAPIMANAGER.SteamCustomCodes.STEAM_LOBBY_PLAYER_ENTERED.ToString());
             }
         }
-        else
+        else //Just go back to titlescreen
         {
             SceneManager.LoadScene("TitleScreen");
         }
     }
 
+    //IF STEAMAPIMANAGER NOT NULL AND INITIALIZED, LEAVE LOBBY IF MULTIPLAYER GAME AND BACK TO TITLESCREEN
     public void JoinedLobbyLeave()
     {
         if(STEAMAPIMANAGER.instance != null)

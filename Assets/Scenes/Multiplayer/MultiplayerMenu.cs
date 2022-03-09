@@ -49,6 +49,8 @@ public class MultiplayerMenu : MonoBehaviour
         SceneManager.LoadScene("TitleScreen");
     }
 
+
+    //CREATE THE LOBBY WITH USER VARIABLES HE ENTERED IN SCENE
     public void SubmitLobby()
     {
         LobbyInfo lobby = new LobbyInfo
@@ -69,6 +71,8 @@ public class MultiplayerMenu : MonoBehaviour
         SceneManager.LoadScene("LobbyMenu");
     }
 
+    // SHOULD UPDATE THE LIST OF LOBBIES FOUND
+    // DOES NOT WORK FOR THE MOMENT..
     public void UpdateLobbyList()
     {
         if (!Steamworks.SteamAPI.Init())
@@ -83,8 +87,6 @@ public class MultiplayerMenu : MonoBehaviour
 
         //string lobbyName = "lobby1";
         //GameObject LobbyButtonJoin = Instantiate(prefabLobbyButtonJoin, new Vector3(0, 0, 0), Quaternion.identity);
-            //myJoinButton.GetComponent<JoinLobby>().cSteamID = idLobby;
-            //myJoinButton.transform.GetChild(0).GetChild(0).gameObject.GetComponent<UnityEngine.UI.Text>().text = sName;
         //LobbyButtonJoin.transform.GetChild(0).gameObject.GetComponent<Text>().text = lobbyName;
         //LobbyButtonJoin.transform.SetParent(LobbiesList.transform);
     }
