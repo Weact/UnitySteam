@@ -1,6 +1,9 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class BunnyHopper : MonoBehaviour
 {
@@ -20,6 +23,11 @@ public class BunnyHopper : MonoBehaviour
     private float lastJumpPress = -1f;
     private float jumpPressDuration = 0.1f;
     private bool onGround = false;
+
+    [Header("UI_Speed")]
+    public TMPro.TMP_Text textSpeedUI;
+
+    public GameObject deathArea;
 
 
     //MAKE THE PLAYER CONTROLLABLE ACCORDING TO IF ITS A MULTIPLAYER GAME OR LOCAL GAME, AND PLAYER
@@ -56,11 +64,15 @@ public class BunnyHopper : MonoBehaviour
 
     private void Update()
     {
+        SetUISpeed();
+        CheckShouldDie();
+
         if (Input.GetButton("Jump"))
         {
             lastJumpPress = Time.time;
         }
     }
+
 
     private void FixedUpdate()
     {
@@ -73,8 +85,30 @@ public class BunnyHopper : MonoBehaviour
             playerVelocity += CalculateMovement(input, playerVelocity);
 
             GetComponent<Rigidbody>().velocity = playerVelocity;
+
         }
         
+    }
+    private void SetUISpeed()
+    {
+        float speed = new Vector3(GetComponent<Rigidbody>().velocity.x, 0f, GetComponent<Rigidbody>().velocity.z).magnitude;
+        if (textSpeedUI != null) 
+        { 
+            if(speed <= 0.02f)
+            {
+                textSpeedUI.text = "Speed : " + (0.0f).ToString();
+                return;
+            }
+            textSpeedUI.text = "Speed : " + speed.ToString("F2"); 
+        }
+    }
+
+    private void CheckShouldDie()
+    {
+        if(gameObject.transform.position.y < -5.0f)
+        {
+            gameObject.transform.position = new Vector3(10f, 5f, -10f);
+        }
     }
 
     private Vector3 CalculateFriction(Vector3 currentVelocity)
