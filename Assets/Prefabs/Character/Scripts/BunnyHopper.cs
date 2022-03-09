@@ -21,6 +21,39 @@ public class BunnyHopper : MonoBehaviour
     private float jumpPressDuration = 0.1f;
     private bool onGround = false;
 
+
+    //MAKE THE PLAYER CONTROLLABLE ACCORDING TO IF ITS A MULTIPLAYER GAME OR LOCAL GAME, AND PLAYER
+    void Start()
+    {
+        if (STEAMAPIMANAGER.instance != null)
+        {
+            if (STEAMAPIMANAGER.instance.IsInitialized())
+            {
+                if (!STEAMAPIMANAGER.instance.network_manager.user.hasLobby)
+                {
+                    controlled = true;
+                }
+                else if (STEAMAPIMANAGER.instance.GetLobbyHostSteamID() == STEAMAPIMANAGER.instance.network_manager.user.steamid)
+                {
+                    playerID = 1;
+                    controlled = true;
+                }
+                else
+                {
+                    playerID = 2;
+                }
+            }
+            else // SINGLE PLAYER
+            {
+                controlled = true;
+            }
+        }
+        else // SINGLE PLAYER
+        {
+            controlled = true;
+        }
+    }
+
     private void Update()
     {
         if (Input.GetButton("Jump"))

@@ -59,10 +59,10 @@ Camera:
     height: 1
   near clip plane: 0.3
   far clip plane: 1000
-  field of view: 60
+  field of view: 75
   orthographic: 0
   orthographic size: 5
-  m_Depth: -1
+  m_Depth: 1
   m_CullingMask:
     serializedVersion: 2
     m_Bits: 4294967295
@@ -240,7 +240,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8639116e11b32054c96e951e11f3eb53, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerId: 0
+  playerID: 0
   controlled: 0
   accel: 200
   airAccel: 200
